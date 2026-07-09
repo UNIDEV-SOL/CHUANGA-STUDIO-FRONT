@@ -1,3 +1,4 @@
+import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import type { ReactNode } from "react";
 import { Outlet } from "react-router-dom"; 
@@ -9,6 +10,7 @@ export function PublicLayout({ children }: { children?: ReactNode }) {
       <main className="flex-1">
         {children || <Outlet />}
       </main>
+      <Footer/>
     </div>
   );
 }
