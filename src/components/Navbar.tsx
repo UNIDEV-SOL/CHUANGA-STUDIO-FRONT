@@ -34,7 +34,7 @@ export function Navbar() {
     .toUpperCase();
 
   return (
-    <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/75 border-b border-border/50">
+    <>
       <div className="mx-auto max-w-7xl px-5 md:px-8 h-[72px] flex items-center justify-between gap-6">
         <Link to="/" className="shrink-0">
           <Logo />
@@ -148,6 +148,6 @@ export function Navbar() {
           </div>
         </div>
       </div>
-    </header>
+    </>
   );
 }

@@ -74,14 +74,7 @@ export function AdminLayout() {
         </div>
       </aside>
       <div className="flex-1 lg:ml-[260px]">
-        <header className="h-16 border-b border-border/60 bg-background/80 backdrop-blur sticky top-0 z-30 flex items-center justify-between px-6">
-          <div className="lg:hidden">
-            <Logo compact />
-          </div>
-          <div className="flex items-center gap-4 ml-auto">
-            <Link to="/" className="text-xs story-link text-muted-foreground">Ver site público →</Link>
-          </div>
-        </header>
+  
         <main className="p-6 md:p-8"><Outlet /></main>
         {/* Mobile bottom nav */}
         <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-primary text-primary-foreground border-t border-white/10 flex justify-around py-2">
