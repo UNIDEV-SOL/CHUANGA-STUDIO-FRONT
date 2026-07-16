@@ -1,13 +1,19 @@
 import { formatMZN, relative } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Check, Archive, Phone } from "lucide-react";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { quotationsStore, servicesStore, updateQuotation } from "@/data/store";
+import { useAdminCotacoes } from "@/hooks/useAdminQuotationsApi";
+import { useAdminServicos } from "@/hooks/useAdminBookingsApi";
+
+
 
 export default function AdminQuotationsPage() {
-  const quotations = quotationsStore.useValue();
-  const services = servicesStore.useValue();
+  const quotationsQuery = useAdminCotacoes();
+  const servicesQuery = useAdminServicos();
+
+  const quotations = quotationsQuery.data ?? [];
+  const services = servicesQuery.data ?? [];
+
 
   return (
     <div>
@@ -40,26 +46,29 @@ export default function AdminQuotationsPage() {
                 </p>
               </div>
               <div className="text-right">
-                <p className="font-display text-2xl text-primary">{formatMZN(q.estimatedTotal)}</p>
-                <p className="text-xs text-muted-foreground">{q.serviceIds.length} serviço(s)</p>
+                <p className="font-display text-2xl text-primary">{formatMZN((q as any).estimatedTotal)}</p>
+                <p className="text-xs text-muted-foreground">{(q as any).serviceIds.length} serviço(s)</p>
+
               </div>
             </div>
             <div className="mt-3 flex flex-wrap gap-1.5">
-              {q.serviceIds.slice(0, 6).map((id) => {
-                const s = services.find((x) => x.id === id);
-                return s ? <span key={id} className="text-[11px] bg-secondary px-2 py-0.5 rounded-full">{s.name}</span> : null;
+              {q.serviceIds.slice(0, 6).map((id: any) => {
+                const s = services.find((x: any) => x.id === id);
+                return s ? <span key={id} className="text-[11px] bg-secondary px-2 py-0.5 rounded-full">{s.nome ?? s.name}</span> : null;
               })}
+
               {q.serviceIds.length > 6 && <span className="text-[11px] text-muted-foreground">+{q.serviceIds.length - 6}</span>}
             </div>
             {q.message && <p className="text-sm text-muted-foreground italic mt-3">"{q.message}"</p>}
-            <div className="mt-4 flex gap-2">
-              {q.status !== "respondido" && (
-                <Button size="sm" variant="outline" className="rounded-full" onClick={() => { updateQuotation(q.id, { status: "respondido" }); toast.success("Marcado como respondido"); }}>
+              <div className="mt-4 flex gap-2">
+              {/* update actions via endpoint real pendente */}
+              {false && q.status !== "respondido" && (
+                <Button size="sm" variant="outline" className="rounded-full">
                   <Check className="h-3.5 w-3.5 mr-1" /> Marcar respondido
                 </Button>
               )}
-              {q.status !== "arquivado" && (
-                <Button size="sm" variant="ghost" className="rounded-full" onClick={() => { updateQuotation(q.id, { status: "arquivado" }); toast.success("Arquivado"); }}>
+              {false && q.status !== "arquivado" && (
+                <Button size="sm" variant="ghost" className="rounded-full">
                   <Archive className="h-3.5 w-3.5 mr-1" /> Arquivar
                 </Button>
               )}
@@ -67,6 +76,7 @@ export default function AdminQuotationsPage() {
                 <Button size="sm" className="rounded-full bg-primary">Responder no WhatsApp</Button>
               </a>
             </div>
+
           </div>
         ))}
       </div>

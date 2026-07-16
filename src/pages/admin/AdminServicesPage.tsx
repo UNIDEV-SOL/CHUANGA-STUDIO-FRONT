@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { formatMZN } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,40 +9,121 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
+  Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
+import { CATEGORY_META } from "@/data/mock-services";
 import type { Service } from "@/types";
 import { uid } from "@/lib/store";
-import { deleteService, servicesStore, upsertService } from "@/data/store";
-import { CATEGORY_META } from "@/data/mock-services";
+import type { Servico, ServicoRequest } from "@/types/api";
+import { useAdminDeleteServico, useAdminServicos, useAdminUpsertServico } from "@/hooks/useServicesApi";
 
-const EMPTY: Service = { id: "", name: "", category: "maos", price: 0, duration: 30, description: "", featured: false };
+const EMPTY: Service = {
+  id: "",
+  name: "",
+  category: "maos",
+  price: 0,
+  duration: 30,
+  description: "",
+  featured: false,
+};
 
 export default function AdminServicesPage() {
-  const services = servicesStore.useValue();
+  // Mantém auth/role intacto via AuthContext atual
+  const { isAdmin } = useAuth();
+
+  const { data, isLoading } = useAdminServicos();
+  const upsert = useAdminUpsertServico();
+  const del = useAdminDeleteServico();
+
   const [editing, setEditing] = useState<Service | null>(null);
   const [open, setOpen] = useState(false);
 
-  function startNew() { setEditing({ ...EMPTY, id: uid("s") }); setOpen(true); }
-  function startEdit(s: Service) { setEditing(s); setOpen(true); }
-  function save() {
-    if (!editing) return;
-    if (!editing.name.trim()) return toast.error("Nome obrigatório");
-    upsertService(editing);
-    toast.success("Serviço guardado");
-    setOpen(false);
-  }
-  function remove(id: string) {
-    if (!confirm("Eliminar este serviço?")) return;
-    deleteService(id);
-    toast.success("Serviço eliminado");
+  const services: Service[] = useMemo(() => {
+    const api = (data ?? []) as Servico[];
+    // API usa campos: categoria, duracaoMinutos, destaque, ativo, descricao
+    // UI usa: category, duration, featured, description
+    return api.map((s) => ({
+      id: s.id,
+      name: s.nome,
+      category: s.categoria as any,
+      price: s.preco,
+      duration: s.duracaoMinutos,
+      description: s.descricao ?? "",
+      featured: !!s.destaque,
+    }));
+  }, [data]);
+
+  function startNew() {
+    setEditing({ ...EMPTY, id: uid("s") });
+    setOpen(true);
   }
 
-  const byCat = Object.entries(CATEGORY_META).map(([cat, meta]) => ({
-    cat, meta, items: services.filter((s) => s.category === cat),
-  }));
+  function startEdit(s: Service) {
+    setEditing(s);
+    setOpen(true);
+  }
+
+  function toRequest(s: Service): ServicoRequest {
+    return {
+      nome: s.name,
+      categoria: s.category as any,
+      descricao: s.description ?? null,
+      preco: s.price,
+      duracaoMinutos: s.duration,
+      destaque: !!s.featured,
+      ativo: true,
+    };
+  }
+
+  async function save() {
+    if (!editing) return;
+    if (!editing.name.trim()) return toast.error("Nome obrigatório");
+
+    try {
+      const payload = toRequest(editing);
+      if (!editing.id || editing.id.startsWith("s-")) {
+        // O backend vai devolver um UUID; mas para manter UI, aceitamos o id local e usamos POST.
+        await upsert.mutateAsync({ method: "POST", payload });
+        toast.success("Serviço guardado");
+      } else {
+        await upsert.mutateAsync({ method: "PUT", id: editing.id, payload });
+        toast.success("Serviço atualizado");
+      }
+      setOpen(false);
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  }
+
+  async function remove(id: string) {
+    if (!confirm("Eliminar este serviço?")) return;
+    try {
+      await del.mutateAsync(id);
+      toast.success("Serviço eliminado");
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  }
+
+  const byCat = useMemo(
+    () => Object.entries(CATEGORY_META).map(([cat, meta]) => ({
+      cat,
+      meta,
+      items: services.filter((s) => s.category === cat),
+    })),
+    [services],
+  );
+
+  if (!isAdmin) {
+    return (
+      <div className="p-8">
+        <p className="text-muted-foreground">Acesso negado.</p>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -51,7 +132,7 @@ export default function AdminServicesPage() {
           <p className="text-[11px] uppercase tracking-[0.28em] text-rose-deep font-medium">Menu do estúdio</p>
           <h1 className="font-display text-4xl mt-1">Serviços</h1>
         </div>
-        <Button onClick={startNew} className="rounded-full bg-primary">
+        <Button onClick={startNew} className="rounded-full bg-primary" disabled={isLoading}>
           <Plus className="h-4 w-4 mr-1" /> Novo serviço
         </Button>
       </div>
@@ -71,8 +152,12 @@ export default function AdminServicesPage() {
                     </p>
                     <p className="text-xs text-muted-foreground">{s.duration} min · {formatMZN(s.price)}</p>
                   </div>
-                  <button onClick={() => startEdit(s)} className="p-2 hover:bg-secondary rounded-lg"><Pencil className="h-3.5 w-3.5" /></button>
-                  <button onClick={() => remove(s.id)} className="p-2 hover:bg-destructive/10 text-destructive rounded-lg"><Trash2 className="h-3.5 w-3.5" /></button>
+                  <button onClick={() => startEdit(s)} className="p-2 hover:bg-secondary rounded-lg">
+                    <Pencil className="h-3.5 w-3.5" />
+                  </button>
+                  <button onClick={() => remove(s.id)} className="p-2 hover:bg-destructive/10 text-destructive rounded-lg">
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
                 </div>
               ))}
               {items.length === 0 && <p className="text-xs text-muted-foreground italic">Sem serviços nesta categoria.</p>}
@@ -83,7 +168,9 @@ export default function AdminServicesPage() {
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle className="font-display text-2xl">{editing?.name ? "Editar" : "Novo"} serviço</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle className="font-display text-2xl">{editing?.name ? "Editar" : "Novo"} serviço</DialogTitle>
+          </DialogHeader>
           {editing && (
             <div className="space-y-4">
               <div>
@@ -123,7 +210,9 @@ export default function AdminServicesPage() {
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
-                <Button className="rounded-full bg-primary" onClick={save}>Guardar</Button>
+                <Button className="rounded-full bg-primary" onClick={save} disabled={upsert.isPending}>
+                  Guardar
+                </Button>
               </div>
             </div>
           )}
@@ -132,3 +221,4 @@ export default function AdminServicesPage() {
     </div>
   );
 }
+

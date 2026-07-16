@@ -9,10 +9,15 @@ import {
 import { Search, Trash2, Check, Clock, Phone, User } from "lucide-react";
 import type { BookingStatus } from "@/types";
 import { toast } from "sonner";
+
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { bookingsStore, deleteBooking, servicesStore, updateBooking } from "@/data/store";
+import { useAdminMarcacoes, useAdminServicos } from "@/hooks/useAdminBookingsApi";
+
+
+
+
 
 const STATUS_OPTIONS: { v: BookingStatus | "todas"; label: string }[] = [
   { v: "todas", label: "Todas" },
@@ -24,16 +29,21 @@ const STATUS_OPTIONS: { v: BookingStatus | "todas"; label: string }[] = [
 ];
 
 export default function AdminBookingsPage() {
-  const bookings = bookingsStore.useValue();
-  const services = servicesStore.useValue();
+  const bookingsQuery = useAdminMarcacoes();
+  const servicesQuery = useAdminServicos();
+
+  const bookings = bookingsQuery.data ?? [];
+  const services = servicesQuery.data ?? [];
+
   const [status, setStatus] = useState<BookingStatus | "todas">("todas");
   const [q, setQ] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
 
-  const filtered = bookings
-    .filter((b) => status === "todas" || b.status === status)
-    .filter((b) => !q || b.clientName.toLowerCase().includes(q.toLowerCase()) || b.clientPhone.includes(q))
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const filtered = (bookings as any[])
+    .filter((b: any) => status === "todas" || b.status === status)
+    .filter((b: any) => !q || b.clientName.toLowerCase().includes(q.toLowerCase()) || b.clientPhone.includes(q))
+    .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
 
   const open = openId ? bookings.find((b) => b.id === openId) : null;
 
@@ -87,7 +97,7 @@ export default function AdminBookingsPage() {
                 </td>
                 <td className="px-5 py-4 text-xs max-w-[240px]">
                   <span className="line-clamp-2">
-                    {b.serviceIds.map((id) => services.find((s) => s.id === id)?.name).filter(Boolean).join(", ")}
+                    {b.serviceIds.map((id: string) => services.find((s) => s.id === id)?.name).filter(Boolean).join(", ")}
                   </span>
                 </td>
                 <td className="px-5 py-4"><StatusBadge status={b.status} /></td>
@@ -143,14 +153,18 @@ export default function AdminBookingsPage() {
                   <p className="text-sm">
                     {open.advancePaid ? "✓ Confirmado" : open.advanceProof ? `Referência: ${open.advanceProof}` : "Não enviado"}
                   </p>
-                  {!open.advancePaid && open.advanceProof && (
-                    <Button size="sm" className="mt-2 rounded-full bg-primary" onClick={() => { updateBooking(open.id, { advancePaid: true, status: "confirmada" }); toast.success("Pagamento confirmado"); }}>
+                  {/* update/delete actions (confirmar pagamento / eliminar) não foram migrados ainda para endpoints reais */}
+                  {false && (
+                    <Button size="sm" className="mt-2 rounded-full bg-primary">
                       <Check className="h-3 w-3 mr-1" /> Confirmar pagamento
                     </Button>
                   )}
+
                 </div>
                 <div className="flex flex-wrap gap-2 pt-2">
-                  <Select value={open.status} onValueChange={(v) => { updateBooking(open.id, { status: v as BookingStatus }); toast.success("Estado atualizado"); }}>
+                  {/* update actions via endpoint real pendente */}
+                  <Select value={open.status as any} onValueChange={() => {}}>
+
                     <SelectTrigger className="flex-1 min-w-[200px] h-10"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {STATUS_OPTIONS.filter((s) => s.v !== "todas").map((s) => (
@@ -158,7 +172,8 @@ export default function AdminBookingsPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <Button variant="destructive" size="icon" onClick={() => { deleteBooking(open.id); toast.success("Marcação eliminada"); setOpenId(null); }}>
+                  <Button variant="destructive" size="icon" onClick={() => {}} disabled>
+
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>

@@ -26,6 +26,21 @@ const MAP: Record<BookingStatus, { label: string; cls: string }> = {
 
 export function StatusBadge({ status, className }: { status: BookingStatus; className?: string }) {
   const m = MAP[status];
+
+  if (!m) {
+    return (
+      <span
+        className={cn(
+          "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-medium tracking-wide bg-muted/30 text-muted-foreground border-border",
+          className,
+        )}
+      >
+        <span className="h-1.5 w-1.5 rounded-full bg-current" />
+        Estado desconhecido
+      </span>
+    );
+  }
+
   return (
     <span
       className={cn(
@@ -39,3 +54,4 @@ export function StatusBadge({ status, className }: { status: BookingStatus; clas
     </span>
   );
 }
+

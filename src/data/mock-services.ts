@@ -100,7 +100,7 @@ export const SEED_SERVICES: Service[] = [
 ];
 
 export const CATEGORY_META: Record<
-  Service["category"],
+  any["category"],
   { label: string; tagline: string; icon: string }
 > = {
   maos: { label: "Cuidados com as Mãos", tagline: "Delicadeza em cada gesto", icon: "✋" },

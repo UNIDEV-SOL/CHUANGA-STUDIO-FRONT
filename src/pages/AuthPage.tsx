@@ -16,15 +16,15 @@ export default function AuthPage() {
   const { signIn, signUp, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     try {
       if (mode === "login") {
         const emailSchema = z.string().trim().email().max(120);
         const check = emailSchema.safeParse(form.email);
         if (!check.success) return toast.error("Email inválido.");
-        const u = signIn(form.email, form.password);
-        toast.success(`Bem-vinda, ${u.name.split(" ")[0]}!`);
+        const u = await signIn(form.email, form.password);
+        toast.success("Bem-vinda de volta.");
         navigate(u.role === "admin" ? "/admin" : "/minha-area");
       } else {
         const schema = z.object({
@@ -35,8 +35,8 @@ export default function AuthPage() {
         });
         const parsed = schema.safeParse(form);
         if (!parsed.success) return toast.error(parsed.error.issues[0]?.message ?? "Dados inválidos");
-        const u = signUp(parsed.data);
-        toast.success(`Conta criada. Bem-vinda, ${u.name.split(" ")[0]}!`);
+        const u = await signUp(parsed.data);
+        toast.success("Conta criada com sucesso.");
         navigate("/minha-area");
       }
     } catch (e) {

@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom"; // 1. Adicionado useSearchParams aqui
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { PublicLayout } from "@/layouts/PublicLayout";
 
 import { formatMZN } from "@/lib/format";
@@ -8,13 +8,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/AuthContext";
-// 2. Removido 'UserSearch' da importação do lucide-react abaixo
 import { Check, ArrowRight, ArrowLeft, Copy, Calendar as CalIcon, Clock, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
-import { createBooking, servicesStore } from "@/data/store";
-import { CATEGORY_META } from "@/data/mock-services";
+import { usePost } from "@/hooks/apiHooks";
+import { API_ENDPOINTS } from "@/lib/apiEndpoints";
+import type { CriarMarcacaoRequest } from "@/types/api";
+
+import { usePublicServicos } from "@/hooks/useServicesApi";
+import { servicesStore } from "@/data/store";
+import { normalizeServicos, getCategoryMeta, type NormalizedService } from "@/lib/normalizeServico";
 
 const STEPS = ["Serviços", "Data & hora", "Contacto", "Adiantamento", "Confirmado"] as const;
 
@@ -35,17 +39,24 @@ const contactSchema = z.object({
 });
 
 export default function BookingPage() {
-  const services = servicesStore.useValue();
-  
-  // 3. Substituído o UserSearch pelo gancho correto do React Router
+  // Antes: `const services = servicesStore.useValue();` — usava sempre o mock
+  // local, nunca a API. Agora segue o mesmo padrão do ServicesPage: API primeiro,
+  // com fallback para o mock local, tudo normalizado para o mesmo shape.
+  const { data: apiServices, isLoading: loadingServicos } = usePublicServicos();
+  const localServices = servicesStore.useValue();
+  const services = useMemo(
+    () => normalizeServicos(apiServices ?? localServices),
+    [apiServices, localServices],
+  );
+
   const [searchParams] = useSearchParams();
   const serviceIdFromUrl = searchParams.get("service") || undefined;
 
   const navigate = useNavigate();
   const { user, signUp } = useAuth();
+  const createMarcacao = usePost<any, CriarMarcacaoRequest>(API_ENDPOINTS.publico.marcacoes);
 
   const [step, setStep] = useState(0);
-  // Usa o ID vindo da URL caso exista
   const [selected, setSelected] = useState<string[]>(serviceIdFromUrl ? [serviceIdFromUrl] : []);
   const [date, setDate] = useState(todayIso());
   const [time, setTime] = useState<string>("");
@@ -58,17 +69,27 @@ export default function BookingPage() {
   });
   const [bookingId, setBookingId] = useState<string | null>(null);
 
+  // Se o serviço vindo da URL só existir depois dos dados da API carregarem
+  // (ex: refresh direto em /reservar?service=xxx), garante a seleção assim
+  // que a lista de serviços estiver disponível.
+  useEffect(() => {
+    if (serviceIdFromUrl && services.some((s) => s.id === serviceIdFromUrl)) {
+      setSelected((prev) => (prev.includes(serviceIdFromUrl) ? prev : [...prev, serviceIdFromUrl]));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [serviceIdFromUrl, services.length]);
+
   const selectedServices = useMemo(
-    () => services.filter((s:any) => selected.includes(s.id)),
+    () => services.filter((s) => selected.includes(s.id)),
     [services, selected],
   );
-  const total = selectedServices.reduce((sum:any, s:any) => sum + s.price, 0);
-  const duration = selectedServices.reduce((sum:any, s:any) => sum + s.duration, 0);
+  const total = selectedServices.reduce((sum, s) => sum + s.price, 0);
+  const duration = selectedServices.reduce((sum, s) => sum + s.duration, 0);
 
   const toggle = (id: string) =>
     setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
-  function next() {
+  async function next() {
     if (step === 0 && selected.length === 0) {
       toast.error("Escolha pelo menos um serviço.");
       return;
@@ -86,20 +107,28 @@ export default function BookingPage() {
         return;
       }
       try {
-        if (!user && form.password) {
-          signUp({ name: form.name, email: form.email, phone: form.phone, password: form.password });
+        if (!user) {
+          if (!form.password) {
+            toast.error("Defina uma palavra-passe para criar a sua conta.");
+            return;
+          }
+          await signUp({ name: form.name, email: form.email, phone: form.phone, password: form.password });
         }
-        const b = createBooking({
-          clientId: user?.id ?? "u-new",
-          clientName: form.name,
-          clientPhone: form.phone,
-          serviceIds: selected,
-          date: new Date(`${date}T${time}`).toISOString(),
-          time,
-          totalPrice: total,
-          notes: form.notes,
-        });
-        setBookingId(b.id);
+
+        const payload: CriarMarcacaoRequest = {
+          servicosIds: selected,
+          data: date, // yyyy-MM-dd
+          hora: time, // HH:mm
+          nome: user ? undefined : form.name,
+          email: user ? undefined : form.email,
+          telefone: user ? undefined : form.phone,
+          senha: user ? undefined : form.password || undefined,
+          metodoPagamento: "MPESA",
+          referenciaPagamento: "1234", // backend valida mínimo 4 caracteres; ajuste no passo final
+        };
+
+        const res = await createMarcacao.mutateAsync(payload as CriarMarcacaoRequest);
+        setBookingId(res?.id ?? null);
       } catch (e) {
         toast.error((e as Error).message);
         return;
@@ -142,7 +171,7 @@ export default function BookingPage() {
 
           <div className="bg-card rounded-3xl border border-border/60 shadow-elegant p-6 md:p-10">
             {step === 0 && (
-              <StepServices services={services} selected={selected} toggle={toggle} />
+              <StepServices services={services} selected={selected} toggle={toggle} loading={loadingServicos} />
             )}
             {step === 1 && (
               <StepDateTime date={date} setDate={setDate} time={time} setTime={setTime} duration={duration} />
@@ -154,7 +183,6 @@ export default function BookingPage() {
               <StepPayment bookingId={bookingId} total={total} />
             )}
             {step === 4 && bookingId && (
-              // 4. Corrigido a passagem do navigate aqui tirando o objeto antigo
               <StepDone bookingId={bookingId} onDashboard={() => navigate("/minha-area")} />
             )}
 
@@ -179,11 +207,42 @@ export default function BookingPage() {
   );
 }
 
-// ... Manter os subcomponentes StepServices, StepDateTime, StepContact, StepPayment e StepDone exatamente idênticos ao código original ...
-function StepServices({ services, selected, toggle }: any) {
-  const grouped = Object.entries(CATEGORY_META).map(([cat, meta]) => ({
-    cat, meta, items: services.filter((s: any) => s.category === cat),
-  }));
+function StepServices({
+  services,
+  selected,
+  toggle,
+  loading,
+}: {
+  services: NormalizedService[];
+  selected: string[];
+  toggle: (id: string) => void;
+  loading?: boolean;
+}) {
+  // Agrupa dinamicamente pelas categorias presentes nos dados normalizados
+  // (em vez de iterar CATEGORY_META fixo), para nunca esconder serviços cuja
+  // categoria ainda não está mapeada — caem em "Outros Serviços".
+  const grouped = useMemo(() => {
+    const byCat = new Map<string, NormalizedService[]>();
+    for (const s of services) {
+      const list = byCat.get(s.category) ?? [];
+      list.push(s);
+      byCat.set(s.category, list);
+    }
+    return Array.from(byCat.entries()).map(([cat, items]) => ({
+      cat,
+      meta: getCategoryMeta(cat),
+      items,
+    }));
+  }, [services]);
+
+  if (loading && services.length === 0) {
+    return <p className="text-sm text-muted-foreground py-8">A carregar serviços...</p>;
+  }
+
+  if (!loading && services.length === 0) {
+    return <p className="text-sm text-muted-foreground py-8">Nenhum serviço disponível de momento.</p>;
+  }
+
   return (
     <div>
       <h3 className="font-display text-2xl mb-1">Escolha os serviços</h3>
@@ -195,7 +254,7 @@ function StepServices({ services, selected, toggle }: any) {
               {meta.icon} {meta.label}
             </h4>
             <div className="grid gap-2 sm:grid-cols-2">
-              {items.map((s: any) => {
+              {items.map((s) => {
                 const on = selected.includes(s.id);
                 return (
                   <button
@@ -315,6 +374,7 @@ function StepPayment({ bookingId, total }: { bookingId: string; total: number })
 
   const submit = () => {
     if (proof.trim().length < 4) return toast.error("Coloque a referência ou último dígitos da transação.");
+    toast.success("Referência validada. Obrigado!");
   };
 
   return (

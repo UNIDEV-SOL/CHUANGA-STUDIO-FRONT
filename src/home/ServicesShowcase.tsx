@@ -1,5 +1,8 @@
+import { useMemo } from "react";
 import { SectionTitle } from "@/atoms/SectionTitle";
-import { CATEGORY_META } from "@/data/mock-services";
+import { getCategoryMeta } from "@/lib/normalizeServico";
+import { normalizeServicos } from "@/lib/normalizeServico";
+import { usePublicServicos } from "@/hooks/useServicesApi";
 import { servicesStore } from "@/data/store";
 import { formatMZN } from "@/lib/format";
 import { Link } from "react-router-dom";
@@ -7,7 +10,14 @@ import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 
 export function ServicesShowcase() {
-  const services = servicesStore.useValue();
+  const { data: apiServices } = usePublicServicos();
+  const localServices = servicesStore.useValue();
+
+  const services = useMemo(
+    () => normalizeServicos(apiServices ?? localServices),
+    [apiServices, localServices],
+  );
+
   const featured = services.filter((s) => s.featured).slice(0, 8);
 
   return (
@@ -37,8 +47,9 @@ export function ServicesShowcase() {
               style={{ animationDelay: `${i * 60}ms` }}
             >
               <div className="text-[10px] uppercase tracking-[0.22em] text-rose-deep font-semibold">
-                {CATEGORY_META[s.category].label}
+                {getCategoryMeta(s.category).label}
               </div>
+
               <h3 className="font-display text-2xl mt-3 text-foreground group-hover:text-primary transition">
                 {s.name}
               </h3>

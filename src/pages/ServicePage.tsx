@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+
 import { PublicLayout } from "@/layouts/PublicLayout";
 import { SectionTitle } from "@/atoms/SectionTitle";
 
@@ -8,29 +9,57 @@ import { Button } from "@/components/ui/button";
 import { Search, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Service } from "@/types";
+
 import { cn } from "@/lib/utils";
 import { CATEGORY_META } from "@/data/mock-services";
 import { servicesStore } from "@/data/store";
+import { usePublicServicos } from "@/hooks/useServicesApi";
+import { normalizeServicos, getCategoryMeta } from "@/lib/normalizeServico";
 
-const CATS = Object.entries(CATEGORY_META) as [Service["category"], typeof CATEGORY_META[keyof typeof CATEGORY_META]][];
+const CATS = Object.entries(CATEGORY_META) as Array<[
+  Service["category"],
+  { label: string; tagline: string; icon: string }
+]>;
 
 export default function ServicesPage() {
-  const services = servicesStore.useValue();
+  const { data: apiServices } = usePublicServicos();
+  const localServices = servicesStore.useValue();
+
+  // Normaliza SEMPRE os dados (API ou mock local) para o mesmo shape,
+  // e traduz a categoria PT da API para as chaves internas do CATEGORY_META.
+  const services = useMemo(
+    () => normalizeServicos(apiServices ?? localServices),
+    [apiServices, localServices],
+  );
+
   const [query, setQuery] = useState("");
   const [active, setActive] = useState<Service["category"] | "todos">("todos");
 
   const grouped = useMemo(() => {
     const q = query.toLowerCase().trim();
-    const filtered = services.filter((s:any) => {
+    const filtered = services.filter((s) => {
       if (active !== "todos" && s.category !== active) return false;
       if (q && !s.name.toLowerCase().includes(q)) return false;
       return true;
     });
-    return CATS.map(([cat, meta]) => ({
+
+    // Categorias conhecidas (na ordem definida em CATEGORY_META)
+    const known = CATS.map(([cat, meta]) => ({
       cat,
       meta,
       items: filtered.filter((s) => s.category === cat),
-    })).filter((g) => g.items.length > 0);
+    }));
+
+    // Qualquer serviço cuja categoria não corresponda a nenhuma chave conhecida
+    // (ex: categorias da API ainda não mapeadas) cai aqui, em vez de desaparecer.
+    const orphanItems = filtered.filter(
+      (s) => !CATS.some(([cat]) => cat === s.category),
+    );
+    const orphanGroup = orphanItems.length
+      ? [{ cat: "outros" as const, meta: getCategoryMeta("outros"), items: orphanItems }]
+      : [];
+
+    return [...known, ...orphanGroup].filter((g) => g.items.length > 0);
   }, [services, query, active]);
 
   return (
@@ -108,13 +137,18 @@ export default function ServicesPage() {
               </div>
               <div className="grid gap-4 md:grid-cols-2">
                 {items.map((s) => (
-                  <div key={s.id} className="group flex items-start justify-between gap-6 py-5 px-5 rounded-xl hover:bg-secondary/40 transition">
+                  <div
+                    key={s.id}
+                    className="group flex items-start justify-between gap-6 py-5 px-5 rounded-xl hover:bg-secondary/40 transition"
+                  >
                     <div className="flex-1">
                       <h4 className="font-display text-lg text-foreground group-hover:text-primary transition">
                         {s.name}
                       </h4>
                       {s.description && (
-                        <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{s.description}</p>
+                        <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                          {s.description}
+                        </p>
                       )}
                       <span className="text-xs text-muted-foreground mt-2 inline-block">
                         · {s.duration} min
@@ -123,8 +157,7 @@ export default function ServicesPage() {
                     <div className="text-right shrink-0">
                       <div className="font-display text-xl text-primary">{formatMZN(s.price)}</div>
                       <Link
-                        to="/reservar"
-                        search={{ service: s.id }}
+                        to={`/reservar?service=${encodeURIComponent(s.id)}`}
                         className="text-[11px] uppercase tracking-widest text-rose-deep story-link"
                       >
                         Reservar

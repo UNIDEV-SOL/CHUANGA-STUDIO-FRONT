@@ -5,14 +5,18 @@ import { formatDate, formatMZN } from "@/lib/format";
 import { StatusBadge } from "@/atoms/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Sparkles, Phone, Mail, User } from "lucide-react";
+import { useEffect, useMemo } from "react";
+import { useMinhaAreaCancelarMarcacao, useMinhaAreaMarcacoes, useMinhaAreaPerfil } from "@/hooks/useMinhaAreaApi";
 import { toast } from "sonner";
-import { useEffect } from "react";
-import { bookingsStore, servicesStore, updateBooking } from "@/data/store";
+
+
 
 export default function ClientDashboardPage() {
   const { user, isAuthenticated, isAdmin } = useAuth();
-  const bookings = bookingsStore.useValue();
-  const services = servicesStore.useValue();
+  const perfilQuery = useMinhaAreaPerfil();
+  const marcacoesQuery = useMinhaAreaMarcacoes();
+  const cancelarMutation = useMinhaAreaCancelarMarcacao();
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,11 +26,12 @@ export default function ClientDashboardPage() {
 
   if (!user) return null;
 
-  const mine = bookings.filter((b: any) => b.clientId === user.id || b.clientPhone === user.phone);
-  const upcoming = mine.filter((b: any) => b.status !== "concluida" && b.status !== "cancelada");
-  const history = mine.filter((b: any) => b.status === "concluida" || b.status === "cancelada");
+  const marcacoes = (marcacoesQuery.data ?? []) as any[];
+  const upcoming = marcacoes.filter((b: any) => b.status !== "concluida" && b.status !== "cancelada");
+  const history = marcacoes.filter((b: any) => b.status === "concluida" || b.status === "cancelada");
 
-  const serviceName = (id: string) => services.find((s: any) => s.id === id)?.name ?? id;
+  const serviceName = (id: string) => id;
+
 
   return (
     <PublicLayout>
@@ -85,11 +90,19 @@ export default function ClientDashboardPage() {
                   <div className="text-right">
                     <p className="font-display text-xl text-primary">{formatMZN(b.totalPrice)}</p>
                     <button
-                      onClick={() => { updateBooking(b.id, { status: "cancelada" }); toast.success("Marcação cancelada"); }}
+                      onClick={async () => {
+                        try {
+                          await cancelarMutation.mutateAsync(b.id);
+                          toast.success("Marcação cancelada");
+                        } catch (e) {
+                          toast.error((e as Error).message);
+                        }
+                      }}
                       className="text-xs text-destructive story-link"
                     >
                       Cancelar
                     </button>
+
                   </div>
                 </div>
               ))}
