@@ -1,4 +1,3 @@
-import { PublicLayout } from "@/layouts/PublicLayout";
 import { SectionTitle } from "@/atoms/SectionTitle";
 import { MapPin, Phone, Mail, Clock, Instagram, Facebook } from "lucide-react";
 import { Button } from "@/components/ui/button";
