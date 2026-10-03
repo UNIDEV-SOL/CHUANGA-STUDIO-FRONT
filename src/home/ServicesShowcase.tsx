@@ -1,24 +1,22 @@
 import { useMemo } from "react";
 import { SectionTitle } from "@/atoms/SectionTitle";
 import { getCategoryMeta } from "@/lib/normalizeServico";
-import { normalizeServicos } from "@/lib/normalizeServico";
-import { usePublicServicos } from "@/hooks/useServicesApi";
-import { servicesStore } from "@/data/store";
+import { useCatalogo } from "@/hooks/useServicesApi";
 import { formatMZN } from "@/lib/format";
 import { Link } from "react-router-dom";
 
 import { ArrowUpRight } from "lucide-react";
 
 export function ServicesShowcase() {
-  const { data: apiServices } = usePublicServicos();
-  const localServices = servicesStore.useValue();
+  const { services } = useCatalogo();
 
-  const services = useMemo(
-    () => normalizeServicos(apiServices ?? localServices),
-    [apiServices, localServices],
-  );
+  // Destaques primeiro; se houver poucos, completa com os restantes.
+  const featured = useMemo(() => {
+    const top = services.filter((s) => s.featured);
+    return (top.length >= 4 ? top : [...top, ...services.filter((s) => !s.featured)]).slice(0, 8);
+  }, [services]);
 
-  const featured = services.filter((s) => s.featured).slice(0, 8);
+  if (featured.length === 0) return null;
 
   return (
     <section className="py-24 md:py-32 bg-secondary/30">
@@ -42,7 +40,7 @@ export function ServicesShowcase() {
           {featured.map((s, i) => (
             <Link
               key={s.id}
-              to="/servicos"
+              to={`/reservar?service=${encodeURIComponent(s.id)}`}
               className="group relative rounded-3xl bg-card border border-border/60 p-6 flex flex-col hover-lift animate-fade-up"
               style={{ animationDelay: `${i * 60}ms` }}
             >
