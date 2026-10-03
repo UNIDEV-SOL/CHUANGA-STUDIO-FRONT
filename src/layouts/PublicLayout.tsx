@@ -1,16 +1,23 @@
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
-import type { ReactNode } from "react";
-import { Outlet } from "react-router-dom"; 
+import { useEffect } from "react";
+import { Outlet, useLocation } from "react-router-dom";
 
-export function PublicLayout({ children }: { children?: ReactNode }) {
+export function PublicLayout() {
+  const { pathname } = useLocation();
+
+  // SPA: volta ao topo ao navegar entre páginas.
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [pathname]);
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
       <main className="flex-1">
-        {children || <Outlet />}
+        <Outlet />
       </main>
-      <Footer/>
+      <Footer />
     </div>
   );
 }
