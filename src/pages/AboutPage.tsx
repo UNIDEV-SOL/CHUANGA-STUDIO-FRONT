@@ -1,4 +1,3 @@
-import { PublicLayout } from "@/layouts/PublicLayout";
 import { SectionTitle } from "@/atoms/SectionTitle";
 import studio from "@/assets/studio-interior.jpg";
 import technician from "@/assets/technician.jpg";
