@@ -1,12 +1,14 @@
-// Lightweight localStorage-backed reactive store — no backend needed.
+// Store reativo leve, persistido em localStorage.
 import { useSyncExternalStore } from "react";
 
 type Listener = () => void;
 
 class Store<T> {
   private state: T;
+  private key: string;
   private listeners = new Set<Listener>();
-  constructor(private key: string, initial: T) {
+  constructor(key: string, initial: T) {
+    this.key = key;
     if (typeof window === "undefined") {
       this.state = initial;
       return;
@@ -29,13 +31,17 @@ class Store<T> {
     if (typeof window !== "undefined") {
       try {
         window.localStorage.setItem(this.key, JSON.stringify(next));
-      } catch {}
+      } catch {
+        // storage cheio/bloqueado — mantém o estado só em memória
+      }
     }
     this.listeners.forEach((l) => l());
   };
   subscribe = (l: Listener) => {
     this.listeners.add(l);
-    return () => this.listeners.delete(l);
+    return () => {
+      this.listeners.delete(l);
+    };
   };
 }
 
@@ -47,7 +53,7 @@ export function createStore<T>(key: string, initial: T) {
       () => selector(store.get()),
       () => selector(store.get()),
     );
-  return { ...store, useValue };
+  return { get: store.get, set: store.set, subscribe: store.subscribe, useValue };
 }
 
 export function uid(prefix = "id") {
