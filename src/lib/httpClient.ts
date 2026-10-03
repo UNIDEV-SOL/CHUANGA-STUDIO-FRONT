@@ -1,73 +1,62 @@
-import axios from "axios";
-import { toast } from "sonner";
+import axios, { AxiosError } from "axios";
+import { API_ENDPOINTS } from "./apiEndpoints";
+import { clearSession, getToken } from "./session";
 
-type AxiosRequestConfigLike = {
-  headers?: Record<string, any>;
-};
-
-
+// O backend expõe tudo sob o context-path `/api` e os paths em API_ENDPOINTS
+// já incluem esse prefixo. Por isso a base é apenas o host — se o .env vier
+// com `/api` no fim, removemos para não gerar `/api/api/...`.
 const getApiBaseUrl = () => {
-  const fromEnv = import.meta.env.VITE_API_URL as string | undefined;
-  // Enunciado: Base URL da API: http://localhost:8080/api
-  // Então aqui retornamos exatamente esse valor.
-  return fromEnv?.replace(/\/$/, "") || "http://localhost:8080/";
+  const fromEnv = (import.meta.env.VITE_API_URL as string | undefined)?.trim();
+  const base = fromEnv || "http://localhost:8080";
+  return base.replace(/\/+$/, "").replace(/\/api$/, "");
 };
 
 export const apiClient = axios.create({
   baseURL: getApiBaseUrl(),
-  headers: {
-    "Content-Type": "application/json",
-  },
+  headers: { "Content-Type": "application/json" },
 });
 
-const TOKEN_KEY = "chuanga:token";
-
-export function getToken() {
-  return localStorage.getItem(TOKEN_KEY);
+/** Erro normalizado: `message` já vem com a mensagem do backend quando existe. */
+export class ApiError extends Error {
+  readonly status?: number;
+  constructor(message: string, status?: number) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
 }
 
-export function setToken(token: string | null) {
-  if (!token) localStorage.removeItem(TOKEN_KEY);
-  else localStorage.setItem(TOKEN_KEY, token);
-}
-
-export function extractApiData<T>(data: any): T {
-  // Wrapper: { sucesso, mensagem, dados, timestamp }
-  return data?.dados as T;
+/** Desembrulha o wrapper `{ sucesso, mensagem, dados, timestamp }`. */
+export function extractApiData<T>(data: unknown): T {
+  return (data as { dados: T } | undefined)?.dados as T;
 }
 
 export function extractApiMensagem(error: unknown): string {
-  const anyErr = error as any;
-  const msg = anyErr?.response?.data?.mensagem;
-  if (typeof msg === "string" && msg.trim().length) return msg;
-  return anyErr?.message || "Erro inesperado.";
+  if (error instanceof Error && !(error instanceof AxiosError)) return error.message;
+  const err = error as AxiosError<{ mensagem?: string }>;
+  const msg = err?.response?.data?.mensagem;
+  if (typeof msg === "string" && msg.trim()) return msg;
+  if (err?.code === "ERR_NETWORK") return "Não foi possível contactar o servidor.";
+  return err?.message || "Erro inesperado.";
 }
 
-// Request interceptor: injeta token quando existir
-apiClient.interceptors.request.use((config: any) => {
+apiClient.interceptors.request.use((config) => {
   const token = getToken();
-  if (token) {
-    config.headers = (config.headers ?? {}) as AxiosRequestConfigLike["headers"];
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+  if (token) config.headers.set("Authorization", `Bearer ${token}`);
   return config;
 });
 
+const AUTH_PATHS: string[] = [API_ENDPOINTS.auth.entrar, API_ENDPOINTS.auth.cadastrar];
 
-// Response interceptor: trata 401
 apiClient.interceptors.response.use(
-  (res: any) => res,
-  (error: any) => {
-    const status = error?.response?.status;
-    if (status === 401) {
-      setToken(null);
-      if (typeof window !== "undefined") {
-        window.location.href = "/entrar";
-      }
-      toast.error("Sessão expirada. Faça login novamente.");
+  (res) => res,
+  (error: AxiosError) => {
+    const status = error.response?.status;
+    const url = error.config?.url ?? "";
+    // 401 num endpoint de auth = credenciais erradas, não sessão expirada.
+    if (status === 401 && !AUTH_PATHS.includes(url) && getToken()) {
+      clearSession("expired");
     }
-    return Promise.reject(error);
+    return Promise.reject(new ApiError(extractApiMensagem(error), status));
   },
 );
-
-
