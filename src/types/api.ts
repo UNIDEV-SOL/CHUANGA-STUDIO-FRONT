@@ -1,3 +1,7 @@
+// Espelho dos DTOs do backend (chuanga-studio-backend). Datas chegam como
+// strings ISO sem fuso: LocalDate "yyyy-MM-dd", LocalTime "HH:mm:ss",
+// LocalDateTime "yyyy-MM-ddTHH:mm:ss".
+
 export type PapelUsuario = "ADMIN" | "CLIENTE";
 
 export type StatusMarcacao =
@@ -11,13 +15,18 @@ export type MetodoPagamento = "MPESA" | "EMOLA";
 export type StatusCotacao = "NOVO" | "RESPONDIDO" | "ARQUIVADO";
 
 export interface Usuario {
-  id: string; // UUID
+  id: string;
   nome: string;
   email: string;
   telefone: string;
-  papel: string; // "ADMIN" | "CLIENTE"
+  papel: PapelUsuario;
   contaAtiva: boolean;
-  criadoEm: string; // ISO-8601
+  criadoEm: string;
+}
+
+export interface AutenticacaoResponse {
+  token: string;
+  usuario: Usuario;
 }
 
 export interface Servico {
@@ -42,13 +51,13 @@ export interface Marcacao {
   clienteId: string;
   clienteNome: string;
   clienteTelefone: string;
-  data: string; // yyyy-MM-dd
-  hora: string; // HH:mm:ss
-  status: string; // StatusMarcacao
+  data: string;
+  hora: string;
+  status: StatusMarcacao;
   valorTotal: number;
   valorAdiantamento: number;
   adiantamentoPago: boolean;
-  metodoPagamento: string | null; // MetodoPagamento
+  metodoPagamento: MetodoPagamento | null;
   servicos: MarcacaoServicoItem[];
 }
 
@@ -59,7 +68,7 @@ export interface Cotacao {
   email: string | null;
   mensagem: string | null;
   totalEstimado: number;
-  status: string; // StatusCotacao
+  status: StatusCotacao;
   criadoEm: string;
   servicosNomes: string[];
 }
@@ -83,7 +92,7 @@ export interface EstatisticasAdmin {
 
 export interface ApiResponse<T> {
   sucesso: boolean;
-  mensagem: string | null;
+  mensagem?: string | null;
   dados: T;
   timestamp: string;
 }
@@ -99,7 +108,7 @@ export interface ServicoRequest {
 }
 
 export interface CriarMarcacaoRequest {
-  servicosIds: string[]; // UUIDs
+  servicosIds: string[];
   data: string; // yyyy-MM-dd
   hora: string; // HH:mm
   nome?: string;
@@ -118,3 +127,9 @@ export interface CriarCotacaoRequest {
   servicosIds: string[];
 }
 
+export interface CadastroRequest {
+  nome: string;
+  email: string;
+  telefone: string;
+  senha: string;
+}
