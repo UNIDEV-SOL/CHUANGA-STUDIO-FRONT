@@ -1,57 +1,26 @@
 import { cn } from "@/lib/utils";
-import type { BookingStatus } from "@/types";
+import { COTACAO_STATUS, MARCACAO_STATUS } from "@/lib/status";
 
-const MAP: Record<BookingStatus, { label: string; cls: string }> = {
-  aguardando_pagamento: {
-    label: "Aguarda pagamento",
-    cls: "bg-gold/15 text-gold border-gold/30",
-  },
-  confirmada: {
-    label: "Confirmada",
-    cls: "bg-emerald-500/10 text-emerald-700 border-emerald-500/30 dark:text-emerald-400",
-  },
-  pendente_ausencia: {
-    label: "Reserva pendente",
-    cls: "bg-rose-deep/10 text-rose-deep border-rose-deep/30",
-  },
-  concluida: {
-    label: "Concluída",
-    cls: "bg-primary/10 text-primary border-primary/30",
-  },
-  cancelada: {
-    label: "Cancelada",
-    cls: "bg-muted text-muted-foreground border-border",
-  },
-};
+const BASE =
+  "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-medium tracking-wide whitespace-nowrap";
 
-export function StatusBadge({ status, className }: { status: BookingStatus; className?: string }) {
-  const m = MAP[status];
-
-  if (!m) {
-    return (
-      <span
-        className={cn(
-          "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-medium tracking-wide bg-muted/30 text-muted-foreground border-border",
-          className,
-        )}
-      >
-        <span className="h-1.5 w-1.5 rounded-full bg-current" />
-        Estado desconhecido
-      </span>
-    );
-  }
+export function StatusBadge({
+  status,
+  kind = "marcacao",
+  className,
+}: {
+  status: string | null | undefined;
+  kind?: "marcacao" | "cotacao";
+  className?: string;
+}) {
+  const map: Record<string, { label: string; cls: string }> =
+    kind === "cotacao" ? COTACAO_STATUS : MARCACAO_STATUS;
+  const m = status ? map[status.toUpperCase()] : undefined;
 
   return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-medium tracking-wide",
-        m.cls,
-        className,
-      )}
-    >
+    <span className={cn(BASE, m?.cls ?? "bg-muted/30 text-muted-foreground border-border", className)}>
       <span className="h-1.5 w-1.5 rounded-full bg-current" />
-      {m.label}
+      {m?.label ?? "Estado desconhecido"}
     </span>
   );
 }
-
