@@ -1,42 +1,33 @@
 import { useMemo, useState } from "react";
-import { PublicLayout } from "@/layouts/PublicLayout";
 import { SectionTitle } from "@/atoms/SectionTitle";
 import { formatMZN } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Check, Sparkles } from "lucide-react";
+import { Check, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
-import { usePost } from "@/hooks/apiHooks";
-import { API_ENDPOINTS } from "@/lib/apiEndpoints";
-import type { CriarCotacaoRequest } from "@/types/api";
-
-import { usePublicServicos } from "@/hooks/useServicesApi";
-import { servicesStore } from "@/data/store";
-import { normalizeServicos, getCategoryMeta, type NormalizedService } from "@/lib/normalizeServico";
+import { useCatalogo } from "@/hooks/useServicesApi";
+import { useCriarCotacao } from "@/hooks/useMinhaAreaApi";
+import { groupByCategory } from "@/lib/normalizeServico";
+import { OfflineNotice } from "@/components/OfflineNotice";
 
 const schema = z.object({
-  clientName: z.string().trim().min(2).max(80),
-  clientPhone: z.string().trim().min(6).max(30),
-  clientEmail: z.string().trim().email().max(120).optional().or(z.literal("")),
-  message: z.string().max(500).optional(),
+  clientName: z.string().trim().min(2, "Indique o seu nome.").max(80),
+  clientPhone: z.string().trim().min(6, "Telefone inválido.").max(30),
+  clientEmail: z.string().trim().email("Email inválido.").max(120).optional().or(z.literal("")),
+  message: z.string().max(500, "Mensagem demasiado longa (máx. 500).").optional(),
 });
 
+const EMPTY_FORM = { clientName: "", clientPhone: "", clientEmail: "", message: "" };
+
 export default function QuotationPage() {
-  // Antes: `const services = servicesStore.useValue();` — só mock local,
-  // igual ao bug já corrigido em ServicesPage/BookingPage. Mesmo padrão aqui.
-  const { data: apiServices, isLoading: loadingServicos } = usePublicServicos();
-  const localServices = servicesStore.useValue();
-  const services = useMemo(
-    () => normalizeServicos(apiServices ?? localServices),
-    [apiServices, localServices],
-  );
+  const { services, isLoading: loadingServicos, isFallback } = useCatalogo();
 
   const [selected, setSelected] = useState<string[]>([]);
-  const [form, setForm] = useState({ clientName: "", clientPhone: "", clientEmail: "", message: "" });
+  const [form, setForm] = useState(EMPTY_FORM);
   const [done, setDone] = useState(false);
 
   const total = useMemo(
@@ -44,46 +35,32 @@ export default function QuotationPage() {
     [services, selected],
   );
 
-  // Agrupa dinamicamente pelas categorias presentes nos dados normalizados,
-  // igual ao StepServices do BookingPage — nunca esconde serviços cuja
-  // categoria ainda não esteja mapeada (caem em "Outros Serviços").
-  const grouped = useMemo(() => {
-    const byCat = new Map<string, NormalizedService[]>();
-    for (const s of services) {
-      const list = byCat.get(s.category) ?? [];
-      list.push(s);
-      byCat.set(s.category, list);
-    }
-    return Array.from(byCat.entries()).map(([cat, items]) => ({
-      cat,
-      meta: getCategoryMeta(cat),
-      items,
-    }));
-  }, [services]);
+  const grouped = useMemo(() => groupByCategory(services), [services]);
 
   const toggle = (id: string) =>
     setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
-  const createCotacao = usePost<any, CriarCotacaoRequest>(API_ENDPOINTS.publico.cotacoes);
+  const createCotacao = useCriarCotacao();
 
   async function submit() {
+    if (isFallback) return toast.error("O servidor está indisponível. Tente novamente mais tarde.");
+    if (selected.length === 0) return toast.error("Escolha pelo menos um serviço.");
     const parsed = schema.safeParse(form);
-
     if (!parsed.success) return toast.error(parsed.error.issues[0]?.message ?? "Dados inválidos.");
 
-    if (selected.length === 0) return toast.error("Escolha pelo menos um serviço.");
-    const payload: CriarCotacaoRequest = {
-      nome: form.clientName,
-      telefone: form.clientPhone,
-      email: form.clientEmail || null,
-      mensagem: form.message || null,
-      servicosIds: selected,
-    };
-
-    await createCotacao.mutateAsync(payload);
-    setDone(true);
-
-    toast.success("Cotação enviada. Vamos responder em breve.");
+    try {
+      await createCotacao.mutateAsync({
+        nome: parsed.data.clientName,
+        telefone: parsed.data.clientPhone,
+        email: parsed.data.clientEmail || null,
+        mensagem: parsed.data.message?.trim() || null,
+        servicosIds: selected,
+      });
+      setDone(true);
+      toast.success("Cotação enviada. Vamos responder em breve.");
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
   }
 
   if (done) {
@@ -101,7 +78,7 @@ export default function QuotationPage() {
             onClick={() => {
               setDone(false);
               setSelected([]);
-              setForm({ clientName: "", clientPhone: "", clientEmail: "", message: "" });
+              setForm(EMPTY_FORM);
             }}
             className="mt-8 rounded-full bg-primary px-6"
           >
@@ -123,8 +100,11 @@ export default function QuotationPage() {
           />
           <div className="mt-12 grid lg:grid-cols-[1.4fr_1fr] gap-8">
             <div className="bg-card rounded-3xl border border-border/60 p-6 md:p-8 shadow-elegant max-h-[600px] overflow-y-auto">
-              {loadingServicos && services.length === 0 && (
-                <p className="text-sm text-muted-foreground py-8">A carregar serviços...</p>
+              {isFallback && <OfflineNotice />}
+              {loadingServicos && (
+                <div className="py-12 grid place-items-center text-muted-foreground">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                </div>
               )}
               {!loadingServicos && services.length === 0 && (
                 <p className="text-sm text-muted-foreground py-8">Nenhum serviço disponível de momento.</p>
@@ -141,6 +121,7 @@ export default function QuotationPage() {
                         <button
                           key={s.id}
                           type="button"
+                          aria-pressed={on}
                           onClick={() => toggle(s.id)}
                           className={cn(
                             "flex items-center justify-between p-3 rounded-lg border text-left transition text-sm",
@@ -153,7 +134,7 @@ export default function QuotationPage() {
                             </span>
                             {s.name}
                           </span>
-                          <span className="text-xs text-primary font-medium">{formatMZN(s.price)}</span>
+                          <span className="text-xs text-primary font-medium whitespace-nowrap">{formatMZN(s.price)}</span>
                         </button>
                       );
                     })}
@@ -161,28 +142,33 @@ export default function QuotationPage() {
                 </div>
               ))}
             </div>
-            <aside className="bg-primary text-primary-foreground rounded-3xl p-8 shadow-elegant self-start sticky top-24">
+            <aside className="bg-primary text-primary-foreground rounded-3xl p-8 shadow-elegant self-start lg:sticky lg:top-24">
               <p className="text-[11px] uppercase tracking-widest text-accent">Estimativa</p>
               <p className="font-display text-5xl mt-2">{formatMZN(total)}</p>
               <p className="text-xs opacity-70 mt-1">{selected.length} serviço(s) selecionado(s)</p>
               <div className="mt-6 space-y-3">
                 <div>
-                  <Label className="text-primary-foreground/80 text-xs">Nome</Label>
-                  <Input value={form.clientName} onChange={(e) => setForm({ ...form, clientName: e.target.value })} className="h-10 mt-1 bg-white/10 border-white/20 text-primary-foreground placeholder:text-primary-foreground/50" />
+                  <Label htmlFor="q-clientName" className="text-primary-foreground/80 text-xs">Nome</Label>
+                  <Input id="q-clientName" autoComplete="name" value={form.clientName} onChange={(e) => setForm({ ...form, clientName: e.target.value })} className="h-10 mt-1 bg-white/10 border-white/20 text-primary-foreground placeholder:text-primary-foreground/50" />
                 </div>
                 <div>
-                  <Label className="text-primary-foreground/80 text-xs">Telefone</Label>
-                  <Input value={form.clientPhone} onChange={(e) => setForm({ ...form, clientPhone: e.target.value })} className="h-10 mt-1 bg-white/10 border-white/20 text-primary-foreground placeholder:text-primary-foreground/50" />
+                  <Label htmlFor="q-clientPhone" className="text-primary-foreground/80 text-xs">Telefone</Label>
+                  <Input id="q-clientPhone" type="tel" autoComplete="tel" value={form.clientPhone} onChange={(e) => setForm({ ...form, clientPhone: e.target.value })} className="h-10 mt-1 bg-white/10 border-white/20 text-primary-foreground placeholder:text-primary-foreground/50" />
                 </div>
                 <div>
-                  <Label className="text-primary-foreground/80 text-xs">Email (opcional)</Label>
-                  <Input value={form.clientEmail} onChange={(e) => setForm({ ...form, clientEmail: e.target.value })} className="h-10 mt-1 bg-white/10 border-white/20 text-primary-foreground placeholder:text-primary-foreground/50" />
+                  <Label htmlFor="q-clientEmail" className="text-primary-foreground/80 text-xs">Email (opcional)</Label>
+                  <Input id="q-clientEmail" type="email" autoComplete="email" value={form.clientEmail} onChange={(e) => setForm({ ...form, clientEmail: e.target.value })} className="h-10 mt-1 bg-white/10 border-white/20 text-primary-foreground placeholder:text-primary-foreground/50" />
                 </div>
                 <div>
-                  <Label className="text-primary-foreground/80 text-xs">Mensagem</Label>
-                  <Textarea rows={3} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} className="mt-1 bg-white/10 border-white/20 text-primary-foreground placeholder:text-primary-foreground/50" />
+                  <Label htmlFor="q-message" className="text-primary-foreground/80 text-xs">Mensagem (opcional)</Label>
+                  <Textarea id="q-message" rows={3} maxLength={500} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} className="mt-1 bg-white/10 border-white/20 text-primary-foreground placeholder:text-primary-foreground/50" />
                 </div>
-                <Button onClick={submit} className="w-full rounded-full bg-accent text-primary hover:bg-accent/90 mt-2 h-11">
+                <Button
+                  onClick={submit}
+                  disabled={createCotacao.isPending}
+                  className="w-full rounded-full bg-accent text-primary hover:bg-accent/90 mt-2 h-11"
+                >
+                  {createCotacao.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                   Enviar cotação
                 </Button>
               </div>
