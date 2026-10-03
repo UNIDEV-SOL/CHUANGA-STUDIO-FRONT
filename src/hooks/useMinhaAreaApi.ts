@@ -1,49 +1,53 @@
-import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/lib/httpClient";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiClient, extractApiData } from "@/lib/httpClient";
 import { API_ENDPOINTS } from "@/lib/apiEndpoints";
-import type { Cotacao, EstatisticasAdmin, ClienteResumo, Marcacao, Usuario, StatusMarcacao } from "@/types/api";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { extractApiData } from "@/lib/httpClient";
+import type {
+  CriarCotacaoRequest,
+  CriarMarcacaoRequest,
+  Cotacao,
+  Marcacao,
+} from "@/types/api";
 
-
-// Mantém organização por domínio (minha-area)
-
-export function useMinhaAreaPerfil() {
-  return useQuery({
-    queryKey: [API_ENDPOINTS.minhaArea.perfil],
-    queryFn: async () => {
-      const res = await apiClient.get(API_ENDPOINTS.minhaArea.perfil);
-      return extractApiData<Usuario>(res.data);
-    },
-    enabled: true,
-  });
-}
-
-export function useMinhaAreaMarcacoes() {
+export function useMinhaAreaMarcacoes(enabled: boolean) {
   return useQuery({
     queryKey: [API_ENDPOINTS.minhaArea.marcacoes],
     queryFn: async () => {
       const res = await apiClient.get(API_ENDPOINTS.minhaArea.marcacoes);
-      return extractApiData<Marcacao[]>(res.data);
+      return extractApiData<Marcacao[]>(res.data) ?? [];
     },
-    enabled: true,
+    enabled,
   });
 }
 
 export function useMinhaAreaCancelarMarcacao() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (id: string) => {
-      // Endpoint no enunciado: PATCH /minha-area/marcacoes/{id}/cancelar
-      const res = await apiClient.patch(`${API_ENDPOINTS.minhaArea.marcacoes}/${id}/cancelar`, null);
+      const res = await apiClient.patch(`${API_ENDPOINTS.minhaArea.marcacoes}/${id}/cancelar`);
       return extractApiData<Marcacao>(res.data);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.minhaArea.marcacoes] });
-    },
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.minhaArea.marcacoes] }),
   });
 }
 
+export function useCriarMarcacao() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: CriarMarcacaoRequest) => {
+      const res = await apiClient.post(API_ENDPOINTS.publico.marcacoes, payload);
+      return extractApiData<Marcacao>(res.data);
+    },
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.minhaArea.marcacoes] }),
+  });
+}
 
+export function useCriarCotacao() {
+  return useMutation({
+    mutationFn: async (payload: CriarCotacaoRequest) => {
+      const res = await apiClient.post(API_ENDPOINTS.publico.cotacoes, payload);
+      return extractApiData<Cotacao>(res.data);
+    },
+  });
+}
