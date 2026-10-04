@@ -14,6 +14,10 @@ import { RequireAuth } from "./components/RequireAuth.tsx";
 
 import AdminQuotationsPage from "./pages/admin/AdminQuotationsPage.tsx";
 import AdminBookingsPage from "./pages/admin/AdminBookingsPage.tsx";
+import AdminInvoicesPage from "./pages/admin/AdminInvoicesPage.tsx";
+import AdminSchedulePage from "./pages/admin/AdminSchedulePage.tsx";
+import AdminReportsPage from "./pages/admin/AdminReportsPage.tsx";
+import AdminTeamPage from "./pages/admin/AdminTeamPage.tsx";
 import AdminClientsPage from "./pages/admin/AdminClientPage.tsx";
 import AdminServicesPage from "./pages/admin/AdminServicesPage.tsx";
 import AdminOverviewPage from "./pages/admin/AdminOverviewPage.tsx";
@@ -24,8 +28,17 @@ import ServicesPage from "./pages/ServicePage.tsx";
 import BookingPage from "./pages/BookingPage.tsx";
 import ClientDashboardPage from "./pages/ClientDashboard.tsx";
 import AuthPage from "./pages/AuthPage.tsx";
+import { RecuperarSenhaPage, RedefinirSenhaPage } from "./pages/RecuperarSenhaPage.tsx";
 import QuotationPage from "./pages/QuotationPage.tsx";
 import ContactPage from "./pages/ContactPage.tsx";
+import GalleryPage from "./pages/GalleryPage.tsx";
+import ClientChatPage from "./pages/ClientChatPage.tsx";
+import AdminChatPage from "./pages/admin/AdminChatPage.tsx";
+import AdminGalleryPage from "./pages/admin/AdminGalleryPage.tsx";
+import AdminLoyaltyPage from "./pages/admin/AdminLoyaltyPage.tsx";
+import AdminReviewsPage from "./pages/admin/AdminReviewsPage.tsx";
+import AvaliarPage from "./pages/AvaliarPage.tsx";
+import ValesPage from "./pages/ValesPage.tsx";
 import { PublicLayout } from "./layouts/PublicLayout.tsx";
 
 export const router = createBrowserRouter([
@@ -45,9 +58,22 @@ export const router = createBrowserRouter([
           </RequireAuth>
         ),
       },
+      {
+        path: "minha-area/mensagens",
+        element: (
+          <RequireAuth role="cliente">
+            <ClientChatPage />
+          </RequireAuth>
+        ),
+      },
       { path: "entrar", element: <AuthPage /> },
+      { path: "recuperar-senha", element: <RecuperarSenhaPage /> },
+      { path: "redefinir-senha", element: <RedefinirSenhaPage /> },
       { path: "cotacao", element: <QuotationPage /> },
       { path: "contacto", element: <ContactPage /> },
+      { path: "galeria", element: <GalleryPage /> },
+      { path: "vales", element: <ValesPage /> },
+      { path: "avaliar/:token", element: <AvaliarPage /> },
       { path: "*", element: <Navigate to="/" replace /> },
     ],
   },
@@ -65,6 +91,14 @@ export const router = createBrowserRouter([
       { path: "clientes", element: <AdminClientsPage /> },
       { path: "cotacoes", element: <AdminQuotationsPage /> },
       { path: "marcacoes", element: <AdminBookingsPage /> },
+      { path: "faturas", element: <AdminInvoicesPage /> },
+      { path: "horario", element: <AdminSchedulePage /> },
+      { path: "relatorios", element: <AdminReportsPage /> },
+      { path: "equipa", element: <AdminTeamPage /> },
+      { path: "galeria", element: <AdminGalleryPage /> },
+      { path: "fidelizacao", element: <AdminLoyaltyPage /> },
+      { path: "avaliacoes", element: <AdminReviewsPage /> },
+      { path: "mensagens", element: <AdminChatPage /> },
       { path: "servicos", element: <AdminServicesPage /> },
     ],
   },
