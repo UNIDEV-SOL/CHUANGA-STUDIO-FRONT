@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /minha-area
+Disallow: /avaliar/
+Disallow: /redefinir-senha
+
+Sitemap: https://chuanga-studio.vercel.app/sitemap.xml
