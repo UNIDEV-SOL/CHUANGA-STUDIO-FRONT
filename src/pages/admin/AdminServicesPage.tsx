@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Plus, Pencil, Trash2, Loader2, EyeOff } from "lucide-react";
+import { useState } from "react";
+import { Plus, Pencil, Trash2, Loader2, EyeOff, Search } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { formatMZN } from "@/lib/format";
@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Skeleton } from "@/components/ui/skeleton";
+import { InfiniteScrollTable } from "@/components/InfiniteScrollTable";
+import { useDebounce } from "@/hooks/useDebounce";
 import { QueryError } from "@/components/QueryError";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -21,7 +22,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { CATEGORY_META } from "@/data/mock-services";
-import { groupByCategory, resolveCategory } from "@/lib/normalizeServico";
+import { resolveCategory } from "@/lib/normalizeServico";
 import type { Servico, ServicoRequest } from "@/types/api";
 import { useAdminEliminarServico, useAdminServicos, useAdminSalvarServico } from "@/hooks/useServicesApi";
 
@@ -32,6 +33,7 @@ interface Draft {
   descricao: string;
   preco: string;
   duracaoMinutos: string;
+  manutencaoDias: string;
   destaque: boolean;
   ativo: boolean;
 }
@@ -42,6 +44,7 @@ const EMPTY: Draft = {
   descricao: "",
   preco: "",
   duracaoMinutos: "30",
+  manutencaoDias: "",
   destaque: false,
   ativo: true,
 };
@@ -53,6 +56,7 @@ const schema = z.object({
   descricao: z.string().trim().max(500, "Descrição demasiado longa."),
   preco: z.coerce.number({ invalid_type_error: "Preço inválido." }).positive("O preço deve ser positivo."),
   duracaoMinutos: z.coerce.number({ invalid_type_error: "Duração inválida." }).int("Duração em minutos inteiros.").positive("A duração deve ser positiva."),
+  manutencaoDias: z.string().trim().refine((v) => v === "" || (/^\d+$/.test(v) && Number(v) >= 1 && Number(v) <= 365), "Manutenção: de 1 a 365 dias (ou vazio)."),
   destaque: z.boolean(),
   ativo: z.boolean(),
 });
@@ -64,27 +68,27 @@ const toDraft = (s: Servico): Draft => ({
   descricao: s.descricao ?? "",
   preco: String(s.preco),
   duracaoMinutos: String(s.duracaoMinutos),
+  manutencaoDias: s.manutencaoDias ? String(s.manutencaoDias) : "",
   destaque: s.destaque,
   ativo: s.ativo,
 });
 
 export default function AdminServicesPage() {
-  const servicosQuery = useAdminServicos();
+  const [q, setQ] = useState("");
+  const [categoria, setCategoria] = useState("todas");
+  const [estado, setEstado] = useState<"todos" | "ativos" | "inativos">("todos");
+  const busca = useDebounce(q);
+  // Paginação e filtros feitos na API.
+  const lista = useAdminServicos({
+    busca,
+    categoria,
+    ativo: estado === "todos" ? undefined : estado === "ativos",
+  });
   const salvar = useAdminSalvarServico();
   const eliminar = useAdminEliminarServico();
 
   const [editing, setEditing] = useState<Draft | null>(null);
   const [toDelete, setToDelete] = useState<Servico | null>(null);
-
-  // Agrupa pela categoria resolvida — categorias desconhecidas vão para
-  // "Outros" em vez de desaparecerem do painel.
-  const byCat = useMemo(
-    () =>
-      groupByCategory(
-        (servicosQuery.data ?? []).map((s) => ({ ...s, category: resolveCategory(s.categoria) })),
-      ),
-    [servicosQuery.data],
-  );
 
   async function save() {
     if (!editing) return;
@@ -93,7 +97,11 @@ export default function AdminServicesPage() {
       toast.error(parsed.error.issues[0]?.message ?? "Dados inválidos.");
       return;
     }
-    const payload: ServicoRequest = { ...parsed.data, descricao: parsed.data.descricao || null };
+    const payload: ServicoRequest = {
+      ...parsed.data,
+      descricao: parsed.data.descricao || null,
+      manutencaoDias: parsed.data.manutencaoDias ? Number(parsed.data.manutencaoDias) : null,
+    };
     try {
       await salvar.mutateAsync({ id: editing.id, payload });
       toast.success(editing.id ? "Serviço atualizado." : "Serviço criado.");
@@ -132,59 +140,79 @@ export default function AdminServicesPage() {
         </Button>
       </div>
 
-      {servicosQuery.isError && <QueryError query={servicosQuery} className="mb-4" />}
-
-      {servicosQuery.isLoading && (
-        <div className="grid gap-2 md:grid-cols-2">
-          {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-16 rounded-xl" />)}
+      <div className="flex flex-wrap gap-3 mb-6">
+        <div className="relative flex-1 min-w-[220px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Pesquisar serviço..." value={q} onChange={(e) => setQ(e.target.value)} className="pl-9 h-10" />
         </div>
-      )}
-
-      {servicosQuery.isSuccess && byCat.length === 0 && (
-        <div className="p-10 rounded-2xl border border-dashed border-border text-center text-muted-foreground bg-card">
-          Ainda não há serviços. Crie o primeiro.
-        </div>
-      )}
-
-      <div className="space-y-8">
-        {byCat.map(({ cat, meta, items }) => (
-          <div key={cat}>
-            <h3 className="text-xs uppercase tracking-widest text-rose-deep font-semibold mb-3">
-              {meta.icon} {meta.label} <span className="text-muted-foreground">· {items.length}</span>
-            </h3>
-            <div className="grid gap-2 md:grid-cols-2">
-              {items.map((s) => (
-                <div
-                  key={s.id}
-                  className={`p-4 rounded-xl bg-card border border-border/60 flex items-center gap-3 ${s.ativo ? "" : "opacity-60"}`}
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm flex items-center gap-1.5 min-w-0">
-                      <span className="truncate">{s.nome}</span>
-                      {s.destaque && <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded bg-accent/30 text-rose-deep">Destaque</span>}
-                      {!s.ativo && (
-                        <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground inline-flex items-center gap-1">
-                          <EyeOff className="h-2.5 w-2.5" /> Inativo
-                        </span>
-                      )}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {s.duracaoMinutos} min · {formatMZN(s.preco)}
-                      {cat === "outros" && ` · ${s.categoria}`}
-                    </p>
-                  </div>
-                  <button onClick={() => setEditing(toDraft(s))} className="p-2 hover:bg-secondary rounded-lg" aria-label={`Editar ${s.nome}`}>
-                    <Pencil className="h-3.5 w-3.5" />
-                  </button>
-                  <button onClick={() => setToDelete(s)} className="p-2 hover:bg-destructive/10 text-destructive rounded-lg" aria-label={`Eliminar ${s.nome}`}>
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
+        <Select value={categoria} onValueChange={setCategoria}>
+          <SelectTrigger className="w-full sm:w-[200px] h-10" aria-label="Categoria"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todas">Todas as categorias</SelectItem>
+            {Object.entries(CATEGORY_META).map(([k, m]) => <SelectItem key={k} value={k}>{m.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={estado} onValueChange={(v) => setEstado(v as typeof estado)}>
+          <SelectTrigger className="w-full sm:w-[150px] h-10" aria-label="Estado"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todos">Todos</SelectItem>
+            <SelectItem value="ativos">Ativos</SelectItem>
+            <SelectItem value="inativos">Inativos</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
+
+      {lista.query.isError && <QueryError query={lista.query} className="mb-4" />}
+
+      <InfiniteScrollTable<Servico>
+        data={lista.items}
+        total={lista.total}
+        getRowKey={(s) => s.id}
+        onRowClick={(s) => setEditing(toDraft(s))}
+        isLoading={lista.isLoading}
+        hasMore={lista.hasMore}
+        isLoadingMore={lista.isLoadingMore}
+        onLoadMore={lista.loadMore}
+        emptyMessage="Nenhum serviço com estes filtros."
+        columns={[
+          {
+            id: "nome", label: "Serviço", minWidth: 220,
+            render: (s) => (
+              <span className={`flex items-center gap-1.5 ${s.ativo ? "" : "opacity-60"}`}>
+                <span className="font-medium">{s.nome}</span>
+                {s.destaque && <span className="text-[10px] px-1.5 py-0.5 rounded bg-accent/30 text-rose-deep">Destaque</span>}
+                {!s.ativo && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground inline-flex items-center gap-1">
+                    <EyeOff className="h-2.5 w-2.5" /> Inativo
+                  </span>
+                )}
+              </span>
+            ),
+          },
+          {
+            id: "categoria", label: "Categoria", minWidth: 150,
+            render: (s) => {
+              const meta = CATEGORY_META[resolveCategory(s.categoria) as keyof typeof CATEGORY_META];
+              return <span className="text-xs">{meta ? `${meta.icon} ${meta.label}` : s.categoria}</span>;
+            },
+          },
+          { id: "duracao", label: "Duração", align: "right", minWidth: 90, render: (s) => `${s.duracaoMinutos} min` },
+          { id: "preco", label: "Preço", align: "right", minWidth: 110, className: "font-display text-primary whitespace-nowrap", render: (s) => formatMZN(s.preco) },
+          {
+            id: "acoes", label: "", align: "right", minWidth: 90,
+            render: (s) => (
+              <span className="inline-flex gap-1" onClick={(e) => e.stopPropagation()}>
+                <button onClick={() => setEditing(toDraft(s))} className="p-2 hover:bg-secondary rounded-lg" aria-label={`Editar ${s.nome}`}>
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
+                <button onClick={() => setToDelete(s)} className="p-2 hover:bg-destructive/10 text-destructive rounded-lg" aria-label={`Eliminar ${s.nome}`}>
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </span>
+            ),
+          },
+        ]}
+      />
 
       <Dialog open={!!editing} onOpenChange={(v) => !v && setEditing(null)}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
@@ -225,6 +253,12 @@ export default function AdminServicesPage() {
                   <Label htmlFor="sv-dur">Duração (min)</Label>
                   <Input id="sv-dur" type="number" inputMode="numeric" min={1} step={5} value={editing.duracaoMinutos} onChange={(e) => setEditing({ ...editing, duracaoMinutos: e.target.value })} className="h-10 mt-1" />
                 </div>
+              </div>
+              <div>
+                <Label htmlFor="sv-manut">Lembrete de manutenção (dias)</Label>
+                <Input id="sv-manut" type="number" inputMode="numeric" min={1} max={365} placeholder="Vazio = sem lembrete (ex.: 21)"
+                  value={editing.manutencaoDias} onChange={(e) => setEditing({ ...editing, manutencaoDias: e.target.value })} className="h-10 mt-1" />
+                <p className="text-[11px] text-muted-foreground mt-1">A cliente recebe um email "hora da manutenção" X dias depois, se ainda não tiver marcado.</p>
               </div>
               <div>
                 <Label htmlFor="sv-desc">Descrição</Label>
