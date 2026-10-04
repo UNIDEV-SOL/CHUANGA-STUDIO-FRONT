@@ -7,8 +7,11 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { Logo } from "@/atoms/Logo";
+import { MoradaFields } from "@/components/MoradaFields";
+import { moradaParaApi, type Morada } from "@/lib/morada";
 import { z } from "zod";
 import type { AppUser } from "@/types";
+import { usePaginaTitulo } from "@/lib/seo";
 
 // Regras alinhadas com LoginRequest / CadastroRequest do backend.
 const loginSchema = z.object({
@@ -24,8 +27,10 @@ const signupSchema = z.object({
 });
 
 export default function AuthPage() {
+  usePaginaTitulo("Entrar", { indexar: false });
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
+  const [morada, setMorada] = useState<Morada>({ provinciaId: "", distritoId: "" });
   const [submitting, setSubmitting] = useState(false);
   const { user, signIn, signUp } = useAuth();
   const navigate = useNavigate();
@@ -54,7 +59,7 @@ export default function AuthPage() {
       const u =
         mode === "login"
           ? await signIn(form.email, form.password)
-          : await signUp(form);
+          : await signUp({ ...form, ...moradaParaApi(morada) });
       toast.success(mode === "login" ? `Bem-vinda de volta, ${u.name.split(" ")[0]}.` : "Conta criada com sucesso.");
       navigate(destinationFor(u), { replace: true });
     } catch (err) {
@@ -98,8 +103,14 @@ export default function AuthPage() {
                 <Input id="auth-phone" type="tel" autoComplete="tel" value={form.phone} onChange={set("phone")} className="h-11 mt-1.5" placeholder="+258 8..." />
               </div>
             )}
+            {mode === "signup" && <MoradaFields value={morada} onChange={setMorada} />}
             <div>
-              <Label htmlFor="auth-password">Palavra-passe</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="auth-password">Palavra-passe</Label>
+                {mode === "login" && (
+                  <Link to="/recuperar-senha" className="text-xs text-primary story-link">Esqueci-me da palavra-passe</Link>
+                )}
+              </div>
               <Input
                 id="auth-password"
                 type="password"
