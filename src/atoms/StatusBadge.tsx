@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { COTACAO_STATUS, MARCACAO_STATUS } from "@/lib/status";
+import { COTACAO_STATUS, FATURA_STATUS, MARCACAO_STATUS } from "@/lib/status";
 
 const BASE =
   "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-medium tracking-wide whitespace-nowrap";
@@ -10,11 +10,11 @@ export function StatusBadge({
   className,
 }: {
   status: string | null | undefined;
-  kind?: "marcacao" | "cotacao";
+  kind?: "marcacao" | "cotacao" | "fatura";
   className?: string;
 }) {
   const map: Record<string, { label: string; cls: string }> =
-    kind === "cotacao" ? COTACAO_STATUS : MARCACAO_STATUS;
+    kind === "cotacao" ? COTACAO_STATUS : kind === "fatura" ? FATURA_STATUS : MARCACAO_STATUS;
   const m = status ? map[status.toUpperCase()] : undefined;
 
   return (
