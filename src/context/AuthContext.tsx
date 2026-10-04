@@ -18,6 +18,8 @@ interface SignUpInput {
   email: string;
   phone: string;
   password: string;
+  provinciaId?: number;
+  distritoId?: number;
 }
 
 interface AuthContextValue {
@@ -99,6 +101,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email: input.email.trim(),
         telefone: input.phone.trim(),
         senha: input.password,
+        provinciaId: input.provinciaId,
+        distritoId: input.distritoId,
       } satisfies CadastroRequest),
     [authenticate],
   );
