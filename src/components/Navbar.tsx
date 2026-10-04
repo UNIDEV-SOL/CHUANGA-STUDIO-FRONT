@@ -1,6 +1,7 @@
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Menu, X, User2, LayoutDashboard, LogOut } from "lucide-react";
+import { Menu, X, User2, LayoutDashboard, LogOut, MessagesSquare } from "lucide-react";
+import { useChatNaoLidas } from "@/hooks/useChatApi";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -20,6 +21,7 @@ const NAV = [
   { to: "/", label: "Início" },
   { to: "/servicos", label: "Serviços" },
   { to: "/sobre", label: "O Estúdio" },
+  { to: "/galeria", label: "Galeria" },
   { to: "/cotacao", label: "Cotação" },
   { to: "/contacto", label: "Contacto" },
 ] as const;
@@ -27,6 +29,8 @@ const NAV = [
 export function Navbar() {
   const [open, setOpen] = useState(false);
   const { user, isAdmin, signOut } = useAuth();
+  const chat = useChatNaoLidas(!!user);
+  const porLer = chat.data?.naoLidas ?? 0;
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const initials = getInitials(user?.name);
@@ -74,11 +78,14 @@ export function Navbar() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="rounded-full outline-none focus-visible:ring-2 ring-ring" aria-label="Menu da conta">
-                  <Avatar className="h-9 w-9 border-2 border-accent/40">
-                    <AvatarFallback className="bg-accent/20 text-primary text-xs font-semibold">
-                      {initials}
-                    </AvatarFallback>
-                  </Avatar>
+                  <span className="relative block">
+                    <Avatar className="h-9 w-9 border-2 border-accent/40">
+                      <AvatarFallback className="bg-accent/20 text-primary text-xs font-semibold">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                    {porLer > 0 && <span className="absolute -top-0.5 -right-0.5 h-3 w-3 rounded-full bg-rose-deep border-2 border-background" aria-label="Mensagens por ler" />}
+                  </span>
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
@@ -97,12 +104,21 @@ export function Navbar() {
                     </Link>
                   </DropdownMenuItem>
                 ) : (
-                  <DropdownMenuItem asChild>
-                    <Link to="/minha-area">
-                      <User2 className="h-4 w-4 mr-2" />
-                      Minha área
-                    </Link>
-                  </DropdownMenuItem>
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link to="/minha-area">
+                        <User2 className="h-4 w-4 mr-2" />
+                        Minha área
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/minha-area/mensagens">
+                        <MessagesSquare className="h-4 w-4 mr-2" />
+                        Mensagens
+                        {porLer > 0 && <span className="ml-auto text-[10px] min-w-[18px] h-[18px] px-1 rounded-full bg-rose-deep text-white grid place-items-center">{porLer}</span>}
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
                 )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={logout} className="text-destructive">
