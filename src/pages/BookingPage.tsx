@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Check, ArrowRight, ArrowLeft, Copy, Calendar as CalIcon, Clock, Sparkles, Loader2 } from "lucide-react";
+import { Check, ArrowRight, ArrowLeft, Copy, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -11,20 +12,23 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 import { OfflineNotice } from "@/components/OfflineNotice";
-import { useCatalogo } from "@/hooks/useServicesApi";
+import { useCatalogo, usePublicProfissionais } from "@/hooks/useServicesApi";
+import { SeletorHorario } from "@/components/SeletorHorario";
+import { MoradaFields } from "@/components/MoradaFields";
+import { moradaParaApi, type Morada } from "@/lib/morada";
+import { API_ENDPOINTS } from "@/lib/apiEndpoints";
 import { useCriarMarcacao } from "@/hooks/useMinhaAreaApi";
 import { groupByCategory, type NormalizedService } from "@/lib/normalizeServico";
-import type { Marcacao, MetodoPagamento } from "@/types/api";
+import type { Marcacao, MetodoPagamento, Profissional } from "@/types/api";
+import { usePaginaTitulo } from "@/lib/seo";
 
 const STEPS = ["Serviços", "Data & hora", "Contacto", "Adiantamento", "Confirmado"] as const;
-
-const TIMES = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:30", "14:30", "15:30", "16:30", "17:30", "18:00"];
 
 const ADIANTAMENTO = 150;
 
 const PAGAMENTOS: { metodo: MetodoPagamento; label: string; num: string; nome: string }[] = [
-  { metodo: "MPESA", label: "M-Pesa", num: "84 123 4567", nome: "Angela Mazive" },
-  { metodo: "EMOLA", label: "e-Mola", num: "86 123 4567", nome: "Angela Mazive" },
+  { metodo: "MPESA", label: "M-Pesa", num: "84 658 9542", nome: "Angela Mazive" },
+  { metodo: "EMOLA", label: "e-Mola", num: "87 658 9542", nome: "Angela Mazive" },
 ];
 
 const isPast = (date: string, time: string) => new Date(`${date}T${time}`).getTime() < Date.now();
@@ -38,20 +42,26 @@ const contactSchema = z.object({
 const passwordSchema = z.string().min(6, "A palavra-passe deve ter pelo menos 6 caracteres.").max(64);
 
 export default function BookingPage() {
+  usePaginaTitulo("Marcar online", { descricao: "Marque o seu atendimento no Chuanga Studio em poucos minutos: escolha o serviço, o dia e a hora." });
   const { services, isLoading: loadingServicos, isFallback } = useCatalogo();
 
   const [searchParams] = useSearchParams();
   const serviceIdFromUrl = searchParams.get("service") || undefined;
 
   const navigate = useNavigate();
-  const { user, signUp } = useAuth();
+  const { user, signIn } = useAuth();
+  const queryClient = useQueryClient();
   const createMarcacao = useCriarMarcacao();
 
   const [step, setStep] = useState(0);
   const [selected, setSelected] = useState<string[]>([]);
   const [date, setDate] = useState(todayIso());
   const [time, setTime] = useState<string>("");
+  const [profissionalId, setProfissionalId] = useState<string>("");
+  const profissionaisQuery = usePublicProfissionais();
+  const profissionais = profissionaisQuery.data ?? [];
   const [form, setForm] = useState({ name: "", phone: "", email: "", password: "" });
+  const [morada, setMorada] = useState<Morada>({ provinciaId: "", distritoId: "" });
   const [payment, setPayment] = useState<{ metodo: MetodoPagamento; referencia: string }>({
     metodo: "MPESA",
     referencia: "",
@@ -119,22 +129,36 @@ export default function BookingPage() {
   async function submitBooking() {
     setSubmitting(true);
     try {
-      // Sem sessão: cria a conta primeiro para que a marcação fique associada
-      // ao token (e a cliente possa acompanhá-la logo na "Minha área").
-      if (!user) {
-        await signUp({ name: form.name, email: form.email, phone: form.phone, password: form.password });
-      }
+      // Sem sessão, a conta é criada pelo backend na mesma transação da marcação:
+      // se o horário falhar, não fica uma conta criada sem reserva. Depois entra-se
+      // com ela para a cliente acompanhar tudo na "Minha área".
       const res = await createMarcacao.mutateAsync({
         servicosIds: selectedServices.map((s) => s.id),
         data: date,
         hora: time,
         metodoPagamento: payment.metodo,
         referenciaPagamento: payment.referencia.trim(),
+        ...(profissionalId ? { profissionalId } : {}),
+        ...(user ? {} : { nome: form.name.trim(), email: form.email.trim(), telefone: form.phone.trim(), senha: form.password, ...moradaParaApi(morada) }),
       });
+      if (!user) {
+        try {
+          await signIn(form.email.trim(), form.password);
+        } catch {
+          // A reserva ficou feita; se a entrada automática falhar, a cliente entra depois.
+        }
+      }
       setBooking(res);
       setStep(4);
     } catch (e) {
-      toast.error((e as Error).message);
+      const mensagem = (e as Error).message;
+      toast.error(mensagem);
+      // Alguém ficou com o horário entretanto: volta à escolha de hora, com as vagas atualizadas.
+      if (/horário|hora|fechado|abre/i.test(mensagem)) {
+        setTime("");
+        void queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.publico.disponibilidade] });
+        setStep(1);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -196,9 +220,20 @@ export default function BookingPage() {
             />
           )}
           {step === 1 && (
-            <StepDateTime date={date} setDate={setDate} time={time} setTime={setTime} duration={duration} />
+            <StepDateTime
+              date={date}
+              setDate={setDate}
+              time={time}
+              setTime={setTime}
+              duration={duration}
+              servicosIds={selectedServices.map((s) => s.id)}
+              enabled={!isFallback}
+              profissionais={profissionais}
+              profissionalId={profissionalId}
+              setProfissionalId={setProfissionalId}
+            />
           )}
-          {step === 2 && <StepContact form={form} setForm={setForm} hasAccount={!!user} />}
+          {step === 2 && <StepContact form={form} setForm={setForm} hasAccount={!!user} morada={morada} setMorada={setMorada} />}
           {step === 3 && <StepPayment total={total} payment={payment} setPayment={setPayment} />}
           {step === 4 && booking && (
             <StepDone booking={booking} onDashboard={() => navigate("/minha-area")} />
@@ -300,64 +335,49 @@ function StepServices({
 }
 
 function StepDateTime({
-  date,
-  setDate,
-  time,
-  setTime,
-  duration,
+  profissionais,
+  profissionalId,
+  setProfissionalId,
+  ...props
 }: {
   date: string;
   setDate: (v: string) => void;
   time: string;
   setTime: (v: string) => void;
   duration: number;
+  servicosIds: string[];
+  enabled: boolean;
+  profissionais: Profissional[];
+  profissionalId: string;
+  setProfissionalId: (v: string) => void;
 }) {
+  // Com uma só pessoa na equipa não há escolha a fazer.
+  const opcoes = profissionais.length > 1 ? [{ id: "", nome: "Qualquer profissional" }, ...profissionais] : [];
   return (
     <div>
       <h3 className="font-display text-2xl mb-1">Quando prefere?</h3>
-      <p className="text-sm text-muted-foreground mb-6">Duração estimada: {duration} min.</p>
-      <div className="grid gap-6 md:grid-cols-2">
-        <div>
-          <Label htmlFor="booking-date" className="text-xs uppercase tracking-widest mb-2 block">Data</Label>
-          <div className="relative">
-            <CalIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-            <Input
-              id="booking-date"
-              type="date"
-              min={todayIso()}
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="pl-11 h-12 rounded-xl"
-            />
+      {opcoes.length > 0 && (
+        <div className="mb-5">
+          <p className="text-xs uppercase tracking-widest mb-2 text-muted-foreground">Com quem</p>
+          <div className="flex flex-wrap gap-2">
+            {opcoes.map((p) => (
+              <button
+                key={p.id || "qualquer"}
+                type="button"
+                onClick={() => setProfissionalId(p.id)}
+                aria-pressed={profissionalId === p.id}
+                className={cn(
+                  "h-9 px-4 rounded-full border text-sm transition",
+                  profissionalId === p.id ? "bg-primary text-primary-foreground border-primary" : "border-border hover:border-primary/40",
+                )}
+              >
+                {p.nome}
+              </button>
+            ))}
           </div>
         </div>
-        <div>
-          <Label className="text-xs uppercase tracking-widest mb-2 block">
-            <Clock className="inline h-3.5 w-3.5 mr-1" /> Hora
-          </Label>
-          <div className="grid grid-cols-3 gap-2">
-            {TIMES.map((t) => {
-              const past = !date || isPast(date, t);
-              return (
-                <button
-                  key={t}
-                  type="button"
-                  disabled={past}
-                  onClick={() => setTime(t)}
-                  className={cn(
-                    "h-11 rounded-xl border text-sm font-medium transition disabled:opacity-40 disabled:cursor-not-allowed",
-                    time === t
-                      ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                      : "border-border hover:border-primary/40",
-                  )}
-                >
-                  {t}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+      )}
+      <SeletorHorario {...props} profissionalId={profissionalId || undefined} />
     </div>
   );
 }
@@ -368,10 +388,14 @@ function StepContact({
   form,
   setForm,
   hasAccount,
+  morada,
+  setMorada,
 }: {
   form: ContactForm;
   setForm: React.Dispatch<React.SetStateAction<ContactForm>>;
   hasAccount: boolean;
+  morada: Morada;
+  setMorada: (m: Morada) => void;
 }) {
   const set = (k: keyof ContactForm) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -407,6 +431,11 @@ function StepContact({
             <Label htmlFor="bk-password">Palavra-passe (para a sua conta)</Label>
             <Input id="bk-password" type="password" autoComplete="new-password" value={form.password} onChange={set("password")} className="h-11 mt-1.5" />
             <p className="text-[11px] text-muted-foreground mt-1">Mínimo 6 caracteres.</p>
+          </div>
+        )}
+        {!hasAccount && (
+          <div className="md:col-span-2">
+            <MoradaFields value={morada} onChange={setMorada} />
           </div>
         )}
       </div>
