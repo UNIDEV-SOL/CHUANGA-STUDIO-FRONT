@@ -2,7 +2,10 @@ import portfolioFrench from "@/assets/portfolio-french.jpg";
 import portfolioNeon from "@/assets/portfolio-neon.jpg";
 import technician from "@/assets/technician.jpg";
 import studio from "@/assets/studio-interior.jpg";
+import { Link } from "react-router-dom";
 import { SectionTitle } from "@/atoms/SectionTitle";
+import { useGaleriaPublica } from "@/hooks/useServicesApi";
+import { urlDaApi } from "@/lib/imagem";
 
 const TILES = [
   { src: portfolioNeon, label: "Neon French", tall: true },
@@ -12,6 +15,11 @@ const TILES = [
 ];
 
 export function PortfolioSection() {
+  // Fotos destacadas na galeria do painel; enquanto não houver, ficam as imagens de exemplo.
+  const destaques = useGaleriaPublica({ destaque: true }, 4);
+  const tiles = destaques.items.length >= 2
+    ? destaques.items.slice(0, 4).map((g, i) => ({ src: urlDaApi(g.miniaturaUrl), label: g.titulo ?? "Chuanga Studio", tall: i === 0 || i === 3 }))
+    : TILES;
   return (
     <section className="py-24 md:py-32">
       <div className="mx-auto max-w-7xl px-6 md:px-8">
@@ -22,7 +30,7 @@ export function PortfolioSection() {
           className="mb-14"
         />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
-          {TILES.map((t, i) => (
+          {tiles.map((t, i) => (
             <figure
               key={i}
               className={`relative overflow-hidden rounded-2xl group animate-fade-up ${t.tall ? "row-span-2 aspect-[3/5]" : "aspect-square md:aspect-[4/5]"}`}
@@ -41,6 +49,9 @@ export function PortfolioSection() {
               </figcaption>
             </figure>
           ))}
+        </div>
+        <div className="text-center mt-10">
+          <Link to="/galeria" className="text-primary story-link text-sm font-medium">Ver a galeria completa →</Link>
         </div>
       </div>
     </section>
