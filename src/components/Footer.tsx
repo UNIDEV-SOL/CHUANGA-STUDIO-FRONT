@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Instagram, Facebook, MapPin, Phone, Clock, Heart } from "lucide-react";
 import { Logo } from "@/atoms/Logo";
+import { FichaTecnicaDialog } from "@/components/FichaTecnicaDialog";
 
 export function Footer() {
   return (
@@ -20,7 +21,7 @@ export function Footer() {
           <h4 className="font-display text-lg text-porcelain mb-4">Estúdio</h4>
           <ul className="space-y-3 text-sm text-porcelain/75">
             <li className="flex gap-2.5 items-start"><MapPin className="h-4 w-4 mt-0.5 text-accent shrink-0" /> Maputo – Moçambique</li>
-            <li className="flex gap-2.5 items-start"><Phone className="h-4 w-4 mt-0.5 text-accent shrink-0" /> +258 84 123 4567</li>
+            <li className="flex gap-2.5 items-start"><Phone className="h-4 w-4 mt-0.5 text-accent shrink-0" /> +258 84 658 9542</li>
             <li className="flex gap-2.5 items-start"><Clock className="h-4 w-4 mt-0.5 text-accent shrink-0" /> Seg – Sáb · 8h00 às 19h00</li>
           </ul>
         </div>
@@ -29,6 +30,8 @@ export function Footer() {
           <ul className="space-y-2.5 text-sm text-porcelain/75">
             <li><Link to="/servicos" className="story-link">Serviços</Link></li>
             <li><Link to="/sobre" className="story-link">O Estúdio</Link></li>
+            <li><Link to="/galeria" className="story-link">Galeria</Link></li>
+            <li><Link to="/vales" className="story-link">Vales-oferta</Link></li>
             <li><Link to="/reservar" className="story-link">Reservar</Link></li>
             <li><Link to="/cotacao" className="story-link">Cotação online</Link></li>
             <li><Link to="/contacto" className="story-link">Contacto</Link></li>
@@ -45,7 +48,13 @@ export function Footer() {
       </div>
       <div className="border-t border-porcelain/10">
         <div className="mx-auto max-w-7xl px-6 md:px-8 py-6 flex flex-col md:flex-row justify-between gap-3 text-xs text-porcelain/60">
-          <span>© {new Date().getFullYear()} Chuanga Studio · Angela Mazive</span>
+          <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span>© {new Date().getFullYear()} Chuanga Studio · Angela Mazive</span>
+            <span aria-hidden>·</span>
+            <FichaTecnicaDialog />
+            <span aria-hidden>·</span>
+            <span>Desenvolvido por Unidev Solutions</span>
+          </span>
           <span className="flex items-center gap-1.5">
             Feito com <Heart className="h-3 w-3 fill-accent text-accent" /> em Maputo
           </span>

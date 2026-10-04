@@ -1,14 +1,22 @@
+import { useMemo } from "react";
 import { SectionTitle } from "@/atoms/SectionTitle";
-import { CATEGORY_META } from "@/data/mock-services";
-import { servicesStore } from "@/data/store";
+import { getCategoryMeta } from "@/lib/normalizeServico";
+import { useCatalogo } from "@/hooks/useServicesApi";
 import { formatMZN } from "@/lib/format";
 import { Link } from "react-router-dom";
 
 import { ArrowUpRight } from "lucide-react";
 
 export function ServicesShowcase() {
-  const services = servicesStore.useValue();
-  const featured = services.filter((s) => s.featured).slice(0, 8);
+  const { services } = useCatalogo();
+
+  // Destaques primeiro; se houver poucos, completa com os restantes.
+  const featured = useMemo(() => {
+    const top = services.filter((s) => s.featured);
+    return (top.length >= 4 ? top : [...top, ...services.filter((s) => !s.featured)]).slice(0, 8);
+  }, [services]);
+
+  if (featured.length === 0) return null;
 
   return (
     <section className="py-24 md:py-32 bg-secondary/30">
@@ -32,13 +40,14 @@ export function ServicesShowcase() {
           {featured.map((s, i) => (
             <Link
               key={s.id}
-              to="/servicos"
+              to={`/reservar?service=${encodeURIComponent(s.id)}`}
               className="group relative rounded-3xl bg-card border border-border/60 p-6 flex flex-col hover-lift animate-fade-up"
               style={{ animationDelay: `${i * 60}ms` }}
             >
               <div className="text-[10px] uppercase tracking-[0.22em] text-rose-deep font-semibold">
-                {CATEGORY_META[s.category].label}
+                {getCategoryMeta(s.category).label}
               </div>
+
               <h3 className="font-display text-2xl mt-3 text-foreground group-hover:text-primary transition">
                 {s.name}
               </h3>

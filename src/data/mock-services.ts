@@ -1,4 +1,4 @@
-import type { Service } from "@/types";
+import type { Service, ServiceCategory } from "@/types";
 
 // Preços em MZN — valores de referência, admin pode editar.
 export const SEED_SERVICES: Service[] = [
@@ -100,7 +100,7 @@ export const SEED_SERVICES: Service[] = [
 ];
 
 export const CATEGORY_META: Record<
-  Service["category"],
+  ServiceCategory,
   { label: string; tagline: string; icon: string }
 > = {
   maos: { label: "Cuidados com as Mãos", tagline: "Delicadeza em cada gesto", icon: "✋" },

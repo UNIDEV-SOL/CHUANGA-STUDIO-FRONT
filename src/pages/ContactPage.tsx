@@ -1,9 +1,10 @@
-import { PublicLayout } from "@/layouts/PublicLayout";
 import { SectionTitle } from "@/atoms/SectionTitle";
 import { MapPin, Phone, Mail, Clock, Instagram, Facebook } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { usePaginaTitulo } from "@/lib/seo";
 
 export default function ContactPage() {
+  usePaginaTitulo("Contacto", { descricao: "Fale com o Chuanga Studio em Maputo: telefone, WhatsApp e email." });
   return (
 
       <section className="pt-20 pb-24">
@@ -17,7 +18,7 @@ export default function ContactPage() {
             {[
               { icon: MapPin, title: "Endereço", value: "Maputo — Moçambique", meta: "Zona a definir" },
               { icon: Clock, title: "Horário", value: "Seg – Sáb", meta: "8h00 às 19h00" },
-              { icon: Phone, title: "Telefone", value: "+258 84 123 4567", meta: "WhatsApp disponível" },
+              { icon: Phone, title: "Telefone", value: "+258 84 658 9542", meta: "WhatsApp disponível" },
               { icon: Mail, title: "Email", value: "atelier@chuanga.mz", meta: "Resposta em 24h" },
             ].map((c) => (
               <div key={c.title} className="p-8 rounded-3xl bg-card border border-border/60 flex gap-5 hover-lift">
@@ -43,7 +44,7 @@ export default function ContactPage() {
           </div>
           <div className="mt-12 text-center">
             <Button asChild size="lg" className="rounded-full bg-primary h-12 px-8">
-              <a href="https://wa.me/258841234567" target="_blank" rel="noreferrer">
+              <a href="https://wa.me/258846589542" target="_blank" rel="noreferrer">
                 Falar no WhatsApp
               </a>
             </Button>
