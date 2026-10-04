@@ -13,6 +13,7 @@ import { useCatalogo } from "@/hooks/useServicesApi";
 import { useCriarCotacao } from "@/hooks/useMinhaAreaApi";
 import { groupByCategory } from "@/lib/normalizeServico";
 import { OfflineNotice } from "@/components/OfflineNotice";
+import { usePaginaTitulo } from "@/lib/seo";
 
 const schema = z.object({
   clientName: z.string().trim().min(2, "Indique o seu nome.").max(80),
@@ -24,6 +25,7 @@ const schema = z.object({
 const EMPTY_FORM = { clientName: "", clientPhone: "", clientEmail: "", message: "" };
 
 export default function QuotationPage() {
+  usePaginaTitulo("Pedir cotação", { descricao: "Peça um orçamento ao Chuanga Studio para eventos, noivas ou serviços personalizados." });
   const { services, isLoading: loadingServicos, isFallback } = useCatalogo();
 
   const [selected, setSelected] = useState<string[]>([]);
