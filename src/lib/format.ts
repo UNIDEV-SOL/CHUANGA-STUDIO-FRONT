@@ -69,10 +69,24 @@ export const initials = (name: string | null | undefined) =>
     .join("")
     .toUpperCase();
 
-/** Link wa.me — assume Moçambique (+258) quando o número vem sem indicativo. */
-export function whatsappLink(phone: string) {
+const whatsappDigits = (phone: string) => {
   let digits = phone.replace(/\D/g, "");
   if (digits.startsWith("00")) digits = digits.slice(2);
   if (digits.length === 9) digits = `258${digits}`;
-  return `https://wa.me/${digits}`;
+  return digits;
+};
+
+/** Link wa.me — assume Moçambique (+258) quando o número vem sem indicativo. */
+export function whatsappLink(phone: string) {
+  return `https://wa.me/${whatsappDigits(phone)}`;
+}
+
+/**
+ * Conversa com a mensagem já escrita. No computador vai direto ao WhatsApp Web:
+ * pelo wa.me, a app de desktop costuma abrir a conversa mas perder o texto.
+ */
+export function whatsappMensagemLink(phone: string, texto: string) {
+  const params = `phone=${whatsappDigits(phone)}&text=${encodeURIComponent(texto)}`;
+  const telemovel = typeof navigator !== "undefined" && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  return telemovel ? `https://api.whatsapp.com/send?${params}` : `https://web.whatsapp.com/send?${params}`;
 }
