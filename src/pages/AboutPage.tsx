@@ -2,8 +2,10 @@ import { SectionTitle } from "@/atoms/SectionTitle";
 import studio from "@/assets/studio-interior.jpg";
 import technician from "@/assets/technician.jpg";
 import { ShieldCheck, Sparkles, HeartHandshake, Award } from "lucide-react";
+import { usePaginaTitulo } from "@/lib/seo";
 
 export default function AboutPage() {
+  usePaginaTitulo("Sobre nós", { descricao: "Conheça o Chuanga Studio, estúdio de unhas em Maputo: a equipa, o espaço e a forma como cuidamos de cada cliente." });
   return (
     <>
       <section className="pt-20 pb-24 gradient-hero">
