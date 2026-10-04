@@ -1,4 +1,4 @@
-import type { StatusCotacao, StatusMarcacao } from "@/types/api";
+import type { FormaPagamento, StatusCotacao, StatusFatura, StatusMarcacao } from "@/types/api";
 
 export const MARCACAO_STATUS: Record<StatusMarcacao, { label: string; cls: string }> = {
   AGUARDA_CONFIRMACAO: {
@@ -17,6 +17,10 @@ export const MARCACAO_STATUS: Record<StatusMarcacao, { label: string; cls: strin
     label: "Cancelada",
     cls: "bg-muted text-muted-foreground border-border",
   },
+  NAO_COMPARECEU: {
+    label: "Não compareceu",
+    cls: "bg-destructive/10 text-destructive border-destructive/30",
+  },
 };
 
 export const COTACAO_STATUS: Record<StatusCotacao, { label: string; cls: string }> = {
@@ -31,4 +35,26 @@ export const COTACAO_STATUS: Record<StatusCotacao, { label: string; cls: string 
 export const MARCACAO_STATUS_OPTIONS = Object.entries(MARCACAO_STATUS).map(([value, m]) => ({
   value: value as StatusMarcacao,
   label: m.label,
+}));
+
+export const FATURA_STATUS: Record<StatusFatura, { label: string; cls: string }> = {
+  PENDENTE: { label: "Por pagar", cls: "bg-gold/15 text-gold border-gold/30" },
+  PAGA: {
+    label: "Paga",
+    cls: "bg-emerald-500/10 text-emerald-700 border-emerald-500/30 dark:text-emerald-400",
+  },
+  ANULADA: { label: "Anulada", cls: "bg-muted text-muted-foreground border-border line-through" },
+};
+
+export const FORMA_PAGAMENTO_LABEL: Record<FormaPagamento, string> = {
+  NUMERARIO: "Numerário",
+  MPESA: "M-Pesa",
+  EMOLA: "e-Mola",
+  CARTAO: "Cartão",
+  TRANSFERENCIA: "Transferência bancária",
+};
+
+export const FORMA_PAGAMENTO_OPTIONS = Object.entries(FORMA_PAGAMENTO_LABEL).map(([value, label]) => ({
+  value: value as FormaPagamento,
+  label,
 }));
