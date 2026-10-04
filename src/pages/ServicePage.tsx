@@ -10,10 +10,12 @@ import { cn } from "@/lib/utils";
 import { useCatalogo } from "@/hooks/useServicesApi";
 import { groupByCategory } from "@/lib/normalizeServico";
 import { OfflineNotice } from "@/components/OfflineNotice";
+import { usePaginaTitulo } from "@/lib/seo";
 
 const strip = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
 export default function ServicesPage() {
+  usePaginaTitulo("Serviços e preços", { descricao: "Manicure, pedicure, alongamento em gel e acrílico, nail art e spa em Maputo. Veja os preços e marque online." });
   const { services, isLoading, isFallback } = useCatalogo();
 
   const [query, setQuery] = useState("");
