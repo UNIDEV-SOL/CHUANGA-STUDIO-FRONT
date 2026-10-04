@@ -1,13 +1,17 @@
 import { useMemo, useState } from "react";
-import { Search, Trash2, Check, Clock, Phone, User, Loader2, ChevronRight } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
+import { Search, Trash2, Check, Clock, Phone, User, Loader2, ChevronRight, Receipt, CalendarClock, AlertTriangle, UserRound } from "lucide-react";
 import { toast } from "sonner";
-import { formatMZN, formatDate, formatHora, parseDate } from "@/lib/format";
+import { formatMZN, formatDate, formatHora } from "@/lib/format";
 import { MARCACAO_STATUS_OPTIONS } from "@/lib/status";
 import { StatusBadge } from "@/atoms/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
 import { QueryError } from "@/components/QueryError";
+import { InfiniteScrollTable } from "@/components/InfiniteScrollTable";
+import { useDebounce } from "@/hooks/useDebounce";
+import { FecharContaDialog } from "@/components/FecharContaDialog";
+import { RemarcarDialog } from "@/components/RemarcarDialog";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -23,35 +27,53 @@ import {
   useAdminConfirmarPagamento,
   useAdminEliminarMarcacao,
   useAdminMarcacoes,
+  useAdminAtribuirProfissional,
+  useAdminMarcacao,
+  useAdminProfissionais,
 } from "@/hooks/useAdminApi";
 import type { Marcacao, StatusMarcacao } from "@/types/api";
 
 const METODO_LABEL: Record<string, string> = { MPESA: "M-Pesa", EMOLA: "e-Mola" };
 
-const when = (m: Marcacao) => parseDate(`${m.data}T${m.hora}`)?.getTime() ?? 0;
-
 export default function AdminBookingsPage() {
-  const bookingsQuery = useAdminMarcacoes();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [status, setStatus] = useState<StatusMarcacao | "todas">("todas");
+  const [filtroProf, setFiltroProf] = useState<string>("todas");
+  const [q, setQ] = useState("");
+  const [dataInicio, setDataInicio] = useState("");
+  const [dataFim, setDataFim] = useState("");
+  const busca = useDebounce(q);
+
+  // Filtros enviados à API (paginação no servidor, scroll infinito na tabela).
+  const lista = useAdminMarcacoes({
+    status,
+    busca,
+    profissionalId: filtroProf !== "todas" && filtroProf !== "nenhuma" ? filtroProf : undefined,
+    semProfissional: filtroProf === "nenhuma" ? true : undefined,
+    dataInicio,
+    dataFim,
+  });
   const atualizarStatus = useAdminAtualizarStatusMarcacao();
   const confirmarPagamento = useAdminConfirmarPagamento();
   const eliminar = useAdminEliminarMarcacao();
+  const profissionaisQuery = useAdminProfissionais();
+  const profissionais = useMemo(() => profissionaisQuery.data ?? [], [profissionaisQuery.data]);
+  const atribuir = useAdminAtribuirProfissional();
 
-  const [status, setStatus] = useState<StatusMarcacao | "todas">("todas");
-  const [q, setQ] = useState("");
-  const [openId, setOpenId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [fecharConta, setFecharConta] = useState(false);
+  const [remarcar, setRemarcar] = useState(false);
 
-  const bookings = useMemo(() => bookingsQuery.data ?? [], [bookingsQuery.data]);
-
-  const filtered = useMemo(() => {
-    const term = q.trim().toLowerCase();
-    return bookings
-      .filter((b) => status === "todas" || b.status === status)
-      .filter((b) => !term || b.clienteNome.toLowerCase().includes(term) || b.clienteTelefone.includes(term))
-      .sort((a, b) => when(b) - when(a));
-  }, [bookings, status, q]);
-
-  const open = openId ? bookings.find((b) => b.id === openId) ?? null : null;
+  // ?id= (ex.: vindo de uma notificação) abre a marcação mesmo que não esteja na página carregada.
+  const openId = searchParams.get("id");
+  const setOpenId = (id: string | null) => {
+    const next = new URLSearchParams(searchParams);
+    if (id) next.set("id", id); else next.delete("id");
+    setSearchParams(next, { replace: true });
+  };
+  const detalhe = useAdminMarcacao(openId);
+  const open = openId ? lista.items.find((b) => b.id === openId) ?? detalhe.data ?? null : null;
+  const faltas = open?.clienteFaltas ?? 0;
 
   async function run(action: Promise<unknown>, success: string) {
     try {
@@ -85,80 +107,100 @@ export default function AdminBookingsPage() {
           <h1 className="font-display text-4xl mt-1">Marcações</h1>
         </div>
         <p className="text-sm text-muted-foreground">
-          {filtered.length} de {bookings.length}
+          {lista.total} {lista.total === 1 ? "marcação" : "marcações"}
         </p>
       </div>
 
       <div className="flex flex-wrap gap-3 mb-6">
         <div className="relative flex-1 min-w-[220px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Pesquisar cliente ou telefone..." value={q} onChange={(e) => setQ(e.target.value)} className="pl-9 h-10" />
+          <Input placeholder="Pesquisar cliente, telefone ou email..." value={q} onChange={(e) => setQ(e.target.value)} className="pl-9 h-10" />
         </div>
         <Select value={status} onValueChange={(v) => setStatus(v as StatusMarcacao | "todas")}>
-          <SelectTrigger className="w-full sm:w-[220px] h-10"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[200px] h-10"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="todas">Todos os estados</SelectItem>
             {MARCACAO_STATUS_OPTIONS.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
           </SelectContent>
         </Select>
+        {profissionais.length > 0 && (
+          <Select value={filtroProf} onValueChange={setFiltroProf}>
+            <SelectTrigger className="w-full sm:w-[190px] h-10" aria-label="Profissional"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todas">Toda a equipa</SelectItem>
+              {profissionais.map((p) => <SelectItem key={p.id} value={p.id}>{p.nome}</SelectItem>)}
+              <SelectItem value="nenhuma">Sem profissional</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
+        <div className="flex items-center gap-2">
+          <Input type="date" value={dataInicio} max={dataFim || undefined} onChange={(e) => setDataInicio(e.target.value)} className="h-10 w-[150px]" aria-label="De" />
+          <span className="text-muted-foreground text-sm">a</span>
+          <Input type="date" value={dataFim} min={dataInicio || undefined} onChange={(e) => setDataFim(e.target.value)} className="h-10 w-[150px]" aria-label="Até" />
+        </div>
       </div>
 
-      {bookingsQuery.isError && <QueryError query={bookingsQuery} className="mb-4" />}
+      {lista.query.isError && <QueryError query={lista.query} className="mb-4" />}
 
-      <div className="rounded-2xl bg-card border border-border/60 overflow-x-auto">
-        <table className="w-full text-sm min-w-[720px]">
-          <thead className="bg-secondary/40 text-xs uppercase tracking-wider text-muted-foreground">
-            <tr>
-              <th className="text-left px-5 py-3 font-medium">Cliente</th>
-              <th className="text-left px-5 py-3 font-medium">Data</th>
-              <th className="text-left px-5 py-3 font-medium">Serviços</th>
-              <th className="text-left px-5 py-3 font-medium">Estado</th>
-              <th className="text-right px-5 py-3 font-medium">Total</th>
-              <th className="px-3 py-3 w-8" />
-            </tr>
-          </thead>
-          <tbody>
-            {bookingsQuery.isLoading &&
-              [0, 1, 2, 3].map((i) => (
-                <tr key={i} className="border-t border-border/40">
-                  <td colSpan={6} className="px-5 py-3"><Skeleton className="h-10 w-full" /></td>
-                </tr>
-              ))}
-            {bookingsQuery.isSuccess && filtered.length === 0 && (
-              <tr><td colSpan={6} className="text-center py-10 text-muted-foreground">Nenhuma marcação encontrada.</td></tr>
-            )}
-            {filtered.map((b) => (
-              <tr
-                key={b.id}
-                tabIndex={0}
-                className="border-t border-border/40 hover:bg-secondary/20 cursor-pointer focus-visible:outline-none focus-visible:bg-secondary/30"
-                onClick={() => setOpenId(b.id)}
-                onKeyDown={(e) => e.key === "Enter" && setOpenId(b.id)}
-              >
-                <td className="px-5 py-4">
-                  <p className="font-medium">{b.clienteNome}</p>
-                  <p className="text-xs text-muted-foreground">{b.clienteTelefone}</p>
-                </td>
-                <td className="px-5 py-4 whitespace-nowrap">
-                  <p>{formatDate(b.data)}</p>
-                  <p className="text-xs text-muted-foreground">{formatHora(b.hora)}</p>
-                </td>
-                <td className="px-5 py-4 text-xs max-w-[240px]">
-                  <span className="line-clamp-2">{b.servicos.map((s) => s.nome).join(", ")}</span>
-                </td>
-                <td className="px-5 py-4">
-                  <StatusBadge status={b.status} />
-                  {!b.adiantamentoPago && b.status === "AGUARDA_CONFIRMACAO" && (
-                    <p className="text-[10px] text-muted-foreground mt-1">Pagamento por validar</p>
+      <InfiniteScrollTable<Marcacao>
+        data={lista.items}
+        total={lista.total}
+        getRowKey={(b) => b.id}
+        onRowClick={(b) => setOpenId(b.id)}
+        isLoading={lista.isLoading}
+        hasMore={lista.hasMore}
+        isLoadingMore={lista.isLoadingMore}
+        onLoadMore={lista.loadMore}
+        emptyMessage="Nenhuma marcação encontrada com estes filtros."
+        columns={[
+          {
+            id: "cliente", label: "Cliente", minWidth: 200,
+            render: (b) => (
+              <>
+                <p className="font-medium">
+                  {b.clienteNome}
+                  {(b.clienteFaltas ?? 0) > 0 && (
+                    <span className="ml-2 text-[10px] font-semibold text-destructive" title="Faltas sem aviso">
+                      {b.clienteFaltas} falta{(b.clienteFaltas ?? 0) > 1 ? "s" : ""}
+                    </span>
                   )}
-                </td>
-                <td className="px-5 py-4 text-right font-display text-primary whitespace-nowrap">{formatMZN(b.valorTotal)}</td>
-                <td className="px-3 py-4 text-muted-foreground"><ChevronRight className="h-4 w-4" /></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                </p>
+                <p className="text-xs text-muted-foreground">{b.clienteTelefone}</p>
+              </>
+            ),
+          },
+          {
+            id: "data", label: "Data", minWidth: 150, className: "whitespace-nowrap",
+            render: (b) => (<><p>{formatDate(b.data)}</p><p className="text-xs text-muted-foreground">{formatHora(b.hora)}</p></>),
+          },
+          {
+            id: "servicos", label: "Serviços", minWidth: 220, className: "text-xs max-w-[260px]",
+            render: (b) => (
+              <>
+                <span className="line-clamp-2">{b.servicos.map((s) => s.nome).join(", ")}</span>
+                {b.profissionalNome && <span className="text-muted-foreground">com {b.profissionalNome}</span>}
+              </>
+            ),
+          },
+          {
+            id: "estado", label: "Estado", minWidth: 150,
+            render: (b) => (
+              <>
+                <StatusBadge status={b.status} />
+                {!b.adiantamentoPago && b.status === "AGUARDA_CONFIRMACAO" && (
+                  <p className="text-[10px] text-muted-foreground mt-1">Pagamento por validar</p>
+                )}
+                {b.faturaNumero && <p className="text-[10px] text-muted-foreground mt-1">{b.faturaNumero}</p>}
+              </>
+            ),
+          },
+          {
+            id: "total", label: "Total", align: "right", minWidth: 110, className: "font-display text-primary whitespace-nowrap",
+            render: (b) => formatMZN(b.valorTotal),
+          },
+          { id: "abrir", label: "", align: "right", className: "text-muted-foreground w-8", render: () => <ChevronRight className="h-4 w-4 inline" /> },
+        ]}
+      />
 
       <Dialog open={!!open} onOpenChange={(v) => !v && setOpenId(null)}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
@@ -181,9 +223,47 @@ export default function AdminBookingsPage() {
                   </div>
                   <StatusBadge status={open.status} />
                 </div>
-                <div className="p-4 rounded-xl bg-secondary/40">
-                  <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1"><Clock className="inline h-3 w-3 mr-1" /> Quando</p>
-                  <p className="font-display text-lg">{formatDate(open.data)} · {formatHora(open.hora)}</p>
+                {faltas > 0 && (
+                  <div className="p-3 rounded-lg border border-destructive/30 bg-destructive/5 text-xs flex gap-2">
+                    <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />
+                    <span>
+                      Esta cliente já faltou {faltas} vez{faltas > 1 ? "es" : ""} sem avisar.
+                      Confirme o adiantamento antes de reservar o horário.
+                    </span>
+                  </div>
+                )}
+                {profissionais.length > 0 && (
+                  <div className="flex items-center gap-3">
+                    <UserRound className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <span className="text-xs uppercase tracking-widest text-muted-foreground">Profissional</span>
+                    <Select
+                      value={open.profissionalId ?? "nenhuma"}
+                      disabled={busy || atribuir.isPending || !(open.status === "AGUARDA_CONFIRMACAO" || open.status === "CONFIRMADA")}
+                      onValueChange={(v) => run(
+                        atribuir.mutateAsync({ id: open.id, profissionalId: v === "nenhuma" ? null : v }),
+                        "Profissional atualizada.",
+                      )}
+                    >
+                      <SelectTrigger className="h-9 flex-1" aria-label="Profissional da marcação"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="nenhuma">Sem profissional</SelectItem>
+                        {profissionais.filter((p) => p.ativo || p.id === open.profissionalId).map((p) => (
+                          <SelectItem key={p.id} value={p.id}>{p.nome}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                <div className="p-4 rounded-xl bg-secondary/40 flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1"><Clock className="inline h-3 w-3 mr-1" /> Quando</p>
+                    <p className="font-display text-lg">{formatDate(open.data)} · {formatHora(open.hora)}</p>
+                  </div>
+                  {(open.status === "AGUARDA_CONFIRMACAO" || open.status === "CONFIRMADA") && (
+                    <Button variant="outline" size="sm" className="rounded-full" disabled={busy} onClick={() => setRemarcar(true)}>
+                      <CalendarClock className="h-4 w-4 mr-1.5" /> Remarcar
+                    </Button>
+                  )}
                 </div>
                 <div>
                   <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Serviços</p>
@@ -206,7 +286,7 @@ export default function AdminBookingsPage() {
                     </p>
                     <p className="text-sm font-medium">{open.adiantamentoPago ? "✓ Confirmado" : "Por validar"}</p>
                   </div>
-                  {!open.adiantamentoPago && open.status !== "CANCELADA" && (
+                  {!open.adiantamentoPago && (open.status === "AGUARDA_CONFIRMACAO" || open.status === "CONFIRMADA") && (
                     <Button
                       size="sm"
                       className="rounded-full bg-primary"
@@ -218,6 +298,25 @@ export default function AdminBookingsPage() {
                     </Button>
                   )}
                 </div>
+                {open.faturaId ? (
+                  <Link
+                    to={`/admin/faturas?id=${open.faturaId}`}
+                    className="p-3 rounded-lg border border-border flex flex-wrap items-center justify-between gap-3 hover:bg-secondary/30"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Receipt className="h-4 w-4 text-rose-deep" />
+                      <span className="font-medium">Fatura {open.faturaNumero}</span>
+                      <StatusBadge kind="fatura" status={open.faturaStatus} />
+                    </span>
+                    <span className="text-xs text-muted-foreground">Abrir fatura</span>
+                  </Link>
+                ) : (
+                  (open.status === "CONFIRMADA" || open.status === "AGUARDA_CONFIRMACAO") && (
+                    <Button className="w-full rounded-full bg-primary h-11" disabled={busy} onClick={() => setFecharConta(true)}>
+                      <Receipt className="h-4 w-4 mr-2" /> Fechar conta e emitir fatura
+                    </Button>
+                  )
+                )}
                 <div className="flex flex-wrap gap-2 pt-2">
                   <Select value={open.status} onValueChange={(v) => changeStatus(open, v as StatusMarcacao)} disabled={busy}>
                     <SelectTrigger className="flex-1 min-w-[200px] h-10" aria-label="Alterar estado"><SelectValue /></SelectTrigger>
@@ -236,6 +335,9 @@ export default function AdminBookingsPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      <FecharContaDialog marcacao={open} open={fecharConta} onOpenChange={setFecharConta} />
+      <RemarcarDialog marcacao={open} open={remarcar} onOpenChange={setRemarcar} modo="admin" />
 
       <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
         <AlertDialogContent>
