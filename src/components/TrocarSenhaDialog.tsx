@@ -8,6 +8,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { useTrocarSenha } from "@/hooks/useAdminApi";
+import { SENHA_DICA, erroSenha } from "@/lib/senha";
 
 /** Alterar a própria palavra-passe (admin ou cliente). */
 export function TrocarSenhaDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
@@ -26,11 +27,12 @@ export function TrocarSenhaDialog({ open, onOpenChange }: { open: boolean; onOpe
 
   async function guardar(e: React.FormEvent) {
     e.preventDefault();
-    if (nova.length < 6) return toast.error("A nova palavra-passe deve ter pelo menos 6 caracteres.");
+    const erro = erroSenha(nova);
+    if (erro) return toast.error(erro);
     if (nova !== repetir) return toast.error("As palavras-passe não coincidem.");
     try {
       await trocar.mutateAsync({ senhaAtual: atual, novaSenha: nova });
-      toast.success("Palavra-passe alterada.");
+      toast.success("Palavra-passe alterada. As sessões noutros dispositivos foram terminadas.");
       onOpenChange(false);
     } catch (err) {
       toast.error((err as Error).message);
@@ -52,6 +54,7 @@ export function TrocarSenhaDialog({ open, onOpenChange }: { open: boolean; onOpe
           <div>
             <Label htmlFor="senha-nova">Nova palavra-passe</Label>
             <Input id="senha-nova" type="password" autoComplete="new-password" value={nova} onChange={(e) => setNova(e.target.value)} className="h-10 mt-1" />
+            <p className="text-[11px] text-muted-foreground mt-1">{SENHA_DICA}</p>
           </div>
           <div>
             <Label htmlFor="senha-repetir">Repita a nova</Label>
