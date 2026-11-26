@@ -1,75 +1,74 @@
-# React + TypeScript + Vite
+# Chuanga Studio — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Site público e painel de administração do Chuanga Studio (estúdio de unhas em Maputo):
+**React 19 + TypeScript + Vite**, Tailwind 4, shadcn/ui (Radix), TanStack Query e React Router.
 
-Currently, two official plugins are available:
+O backend está em [CHUANGA-STUDIO-BACK](https://github.com/igortobias/CHUANGA-STUDIO-BACK).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Correr localmente
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+yarn install
+cp .env.example .env.local   # ajustar VITE_API_URL se o backend não estiver em localhost:8080
+yarn dev                     # http://localhost:5173
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+| Script           | O que faz                                      |
+|------------------|------------------------------------------------|
+| `yarn dev`       | servidor de desenvolvimento                    |
+| `yarn build`     | verifica os tipos (tsc) e gera o `dist/`       |
+| `yarn typecheck` | só a verificação de tipos                      |
+| `yarn lint`      | ESLint                                         |
+| `yarn preview`   | serve o `dist/` localmente                     |
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Estrutura de pastas
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Arquitetura modular, igual ao SPO-FRONT: cada área do negócio tem a sua pasta em `src/modules/`;
+o que é usado por vários módulos fica em `src/shared/`.
 
 ```
+src/
+├── main.tsx            providers (React Query, tema, sessão) + router
+├── routes/index.tsx    todas as rotas; cada página é carregada só quando é aberta (lazy)
+├── config/index.ts     variáveis de ambiente (VITE_API_URL, VITE_SITE_URL)
+├── styles.css
+├── assets/             imagens do site
+├── modules/
+│   ├── site/           home, sobre, contacto
+│   ├── auth/           entrar, recuperar senha, sessão, RequireAuth
+│   ├── catalog/        serviços (público + admin)
+│   ├── bookings/       reservar e gerir marcações
+│   ├── schedule/       horário e disponibilidade
+│   ├── quotations/     cotações
+│   ├── invoices/       faturas e fecho de conta
+│   ├── clients/        "Minha área" e fichas de clientes
+│   ├── gallery/        galeria
+│   ├── loyalty/        fidelização e vales-oferta
+│   ├── reviews/        avaliações
+│   ├── chat/           mensagens
+│   ├── team/           equipa e utilizadores
+│   ├── reports/        visão geral e relatórios de caixa
+│   ├── notifications/  sino de notificações
+│   └── locations/      províncias, distritos e morada
+│
+│   Dentro de cada módulo (só as que fazem falta):
+│   pages/  components/  hooks/ (use<Módulo>Api.ts: chamadas à API)  models/ (tipos)  lib/
+│
+└── shared/
+    ├── ui/             componentes shadcn/ui
+    ├── components/     Navbar, Footer, tabelas, estados de erro/carregamento...
+    ├── layouts/        PublicLayout, AdminLayout
+    ├── api/            httpClient (axios), apiEndpoints, paginação, helpers de queries
+    ├── models/         tipos comuns (ApiResponse)
+    ├── hooks/  lib/  providers/
+```
+
+Imports sempre com o alias `@/` (ex.: `@/modules/bookings/hooks/useBookingsApi`).
+
+## Docker e deploy
+
+- `Dockerfile` — build com Node e imagem final com **nginx**, que serve o site e encaminha `/api` para o backend.
+- `nginx.conf` — configuração desse nginx (SPA, cache, `/api`, healthcheck em `/healthz`).
+- `.github/workflows/docker-publish.yml` — verifica e publica a imagem em `ghcr.io/igortobias/chuanga-studio-frontend`.
+
+O `compose.yaml` de produção e o passo a passo estão no backend, em `deploy/DEPLOY.md`.
