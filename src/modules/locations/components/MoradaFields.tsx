@@ -1,9 +1,9 @@
-import { Label } from "@/components/ui/label";
+import { Label } from "@/shared/ui/label";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
-import { useDistritos, useProvincias } from "@/hooks/useServicesApi";
-import type { Morada } from "@/lib/morada";
+} from "@/shared/ui/select";
+import { useDistritos, useProvincias } from "@/modules/locations/hooks/useLocationsApi";
+import type { Morada } from "@/modules/locations/lib/morada";
 
 /** Província e distrito (opcionais), vindos dos classificadores da API. */
 export function MoradaFields({ value, onChange }: { value: Morada; onChange: (m: Morada) => void }) {
