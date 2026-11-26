@@ -12,6 +12,7 @@ import { moradaParaApi, type Morada } from "@/lib/morada";
 import { z } from "zod";
 import type { AppUser } from "@/types";
 import { usePaginaTitulo } from "@/lib/seo";
+import { SENHA_DICA, senhaNovaSchema } from "@/lib/senha";
 
 // Regras alinhadas com LoginRequest / CadastroRequest do backend.
 const loginSchema = z.object({
@@ -23,7 +24,7 @@ const signupSchema = z.object({
   name: z.string().trim().min(2, "Nome muito curto.").max(80),
   email: z.string().trim().email("Email inválido.").max(120),
   phone: z.string().trim().min(6, "Telefone inválido.").max(30),
-  password: z.string().min(6, "A palavra-passe deve ter pelo menos 6 caracteres.").max(64),
+  password: senhaNovaSchema,
 });
 
 export default function AuthPage() {
@@ -119,7 +120,7 @@ export default function AuthPage() {
                 onChange={set("password")}
                 className="h-11 mt-1.5"
               />
-              {mode === "signup" && <p className="text-[11px] text-muted-foreground mt-1">Mínimo 6 caracteres.</p>}
+              {mode === "signup" && <p className="text-[11px] text-muted-foreground mt-1">{SENHA_DICA}</p>}
             </div>
             <Button type="submit" disabled={submitting} className="w-full h-11 rounded-full bg-primary">
               {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
