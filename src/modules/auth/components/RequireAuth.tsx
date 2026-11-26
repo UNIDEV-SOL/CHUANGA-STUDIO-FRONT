@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
-import type { UserRole } from "@/types";
+import { useAuth } from "@/modules/auth/context/AuthContext";
+import type { UserRole } from "@/modules/auth/models";
 
 /**
  * Protege rotas por sessão e papel. Sem sessão -> /entrar (com retorno);
