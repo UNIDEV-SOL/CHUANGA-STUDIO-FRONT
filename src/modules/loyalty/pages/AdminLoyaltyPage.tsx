@@ -2,26 +2,24 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Ban, Copy, Gift, Loader2, Plus, Search, Stamp } from "lucide-react";
 import { toast } from "sonner";
-import { formatDateShort, formatMZN } from "@/lib/format";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { QueryError } from "@/components/QueryError";
-import { InfiniteScrollTable } from "@/components/InfiniteScrollTable";
-import { useDebounce } from "@/hooks/useDebounce";
+import { formatDateShort, formatMZN } from "@/shared/lib/format";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
+import { Switch } from "@/shared/ui/switch";
+import { Textarea } from "@/shared/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
+import { QueryError } from "@/shared/components/QueryError";
+import { InfiniteScrollTable } from "@/shared/components/InfiniteScrollTable";
+import { useDebounce } from "@/shared/hooks/useDebounce";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
+} from "@/shared/ui/select";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  useAnularVale, useCriarVale, useFidelizacaoConfig, useGuardarFidelizacaoConfig, useVales,
-} from "@/hooks/useFidelizacaoApi";
-import type { EstadoVale, Vale } from "@/types/api";
+} from "@/shared/ui/dialog";
+import { useAnularVale, useCriarVale, useFidelizacaoConfig, useGuardarFidelizacaoConfig, useVales } from "@/modules/loyalty/hooks/useLoyaltyApi";
+import type { EstadoVale, Vale } from "@/modules/loyalty/models";
 
 const ESTADO_VALE: Record<EstadoVale, { label: string; cls: string }> = {
   ATIVO: { label: "Ativo", cls: "bg-emerald-100 text-emerald-800" },
