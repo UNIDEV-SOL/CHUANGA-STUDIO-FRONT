@@ -1,15 +1,16 @@
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { BarChart3, LayoutDashboard, CalendarRange, Clock, Receipt, Sparkles, Users, MessageSquare, LogOut, ExternalLink, UsersRound, MoreHorizontal, Images, PanelLeftClose, PanelLeftOpen, MessagesSquare, Gift, Star } from "lucide-react";
-import { Logo } from "@/atoms/Logo";
-import { useAuth } from "@/context/AuthContext";
-import { cn } from "@/lib/utils";
-import { initials } from "@/lib/format";
+import { Logo } from "@/shared/components/Logo";
+import { useAuth } from "@/modules/auth/context/AuthContext";
+import { cn } from "@/shared/lib/utils";
+import { initials } from "@/shared/lib/format";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { NotificacoesBell } from "@/components/NotificacoesBell";
-import { useChatNaoLidas } from "@/hooks/useChatApi";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { usePaginaTitulo } from "@/lib/seo";
+import { PageLoader } from "@/shared/components/PageLoader";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/shared/ui/sheet";
+import { NotificacoesBell } from "@/modules/notifications/components/NotificacoesBell";
+import { useChatNaoLidas } from "@/modules/chat/hooks/useChatApi";
+import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
+import { usePaginaTitulo } from "@/shared/lib/seo";
 
 interface NavItem { to: string; label: string; short: string; icon: typeof LayoutDashboard; end?: boolean }
 const NAV: NavItem[] = [
@@ -161,7 +162,7 @@ export function AdminLayout() {
         <div className="hidden lg:flex sticky top-0 z-20 justify-end items-center gap-2 px-8 h-14 bg-background/80 backdrop-blur border-b border-border/50">
           <NotificacoesBell />
         </div>
-        <main className="p-5 md:p-8 pb-24 lg:pb-8 max-w-7xl"><Outlet /></main>
+        <main className="p-5 md:p-8 pb-24 lg:pb-8 max-w-7xl"><Suspense fallback={<PageLoader />}><Outlet /></Suspense></main>
       </div>
 
       {/* Mobile bottom nav */}
