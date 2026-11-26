@@ -1,32 +1,25 @@
 import { useState } from "react";
 import { KeyRound, Loader2, Pencil, Plus, Trash2, UserPlus } from "lucide-react";
 import { toast } from "sonner";
-import { useAuth } from "@/context/AuthContext";
-import { formatDate } from "@/lib/format";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Skeleton } from "@/components/ui/skeleton";
-import { QueryError } from "@/components/QueryError";
-import { TrocarSenhaDialog } from "@/components/TrocarSenhaDialog";
+import { useAuth } from "@/modules/auth/context/AuthContext";
+import { formatDate } from "@/shared/lib/format";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
+import { Switch } from "@/shared/ui/switch";
+import { Skeleton } from "@/shared/ui/skeleton";
+import { QueryError } from "@/shared/components/QueryError";
+import { TrocarSenhaDialog } from "@/modules/auth/components/TrocarSenhaDialog";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/shared/ui/dialog";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
-  useAdminAtivarUtilizador,
-  useAdminCriarUtilizador,
-  useAdminGuardarProfissional,
-  useAdminProfissionais,
-  useAdminRemoverProfissional,
-  useAdminUtilizadores,
-} from "@/hooks/useAdminApi";
-import type { Profissional } from "@/types/api";
-import { SENHA_DICA, erroSenha } from "@/lib/senha";
+} from "@/shared/ui/alert-dialog";
+import { useAdminAtivarUtilizador, useAdminCriarUtilizador, useAdminGuardarProfissional, useAdminProfissionais, useAdminRemoverProfissional, useAdminUtilizadores } from "@/modules/team/hooks/useTeamApi";
+import type { Profissional } from "@/modules/team/models";
+import { SENHA_DICA, erroSenha } from "@/modules/auth/lib/senha";
 
 type ProfForm = { id?: string; nome: string; telefone: string; ativo: boolean; ordem: number };
 
