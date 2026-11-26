@@ -4,28 +4,28 @@ import {
   Pencil, Phone, Pin, PinOff, Shield, ShieldOff, Star, Trash2, UserMinus, UserPlus, X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-import { formatDate, initials } from "@/lib/format";
-import { redimensionar } from "@/lib/imagem";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/shared/lib/utils";
+import { formatDate, initials } from "@/shared/lib/format";
+import { redimensionar } from "@/shared/lib/imagem";
+import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Switch } from "@/shared/ui/switch";
+import { Textarea } from "@/shared/ui/textarea";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/shared/ui/dropdown-menu";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
   AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "@/shared/ui/alert-dialog";
 import {
   descarregarAnexo, useAbrirConversaCom, useAnexoMensagem, useDetalhesConversa, useGestaoGrupo, useMidia, usePreferencias,
-} from "@/hooks/useChatApi";
-import type { MensagemChat } from "@/types/api";
-import { AvatarConversa } from "./AvatarConversa";
-import { AdicionarMembrosDialog, FavoritasDialog } from "./Dialogos";
-import { quando, tamanho, vistoPorUltimo } from "./util";
+} from "@/modules/chat/hooks/useChatApi";
+import type { MensagemChat } from "@/modules/chat/models";
+import { AvatarConversa } from "@/modules/chat/components/AvatarConversa";
+import { AdicionarMembrosDialog, FavoritasDialog } from "@/modules/chat/components/Dialogos";
+import { quando, tamanho, vistoPorUltimo } from "@/modules/chat/components/util";
 
 function Miniatura({ m, onAbrir }: { m: MensagemChat; onAbrir: (url: string) => void }) {
   const img = useAnexoMensagem(m.id, true);
