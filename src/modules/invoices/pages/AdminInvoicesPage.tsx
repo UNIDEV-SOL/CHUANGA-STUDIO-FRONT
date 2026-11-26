@@ -2,36 +2,30 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Ban, Check, ChevronRight, Copy, Download, Loader2, Mail, MessageCircle, MessageSquareText, Search } from "lucide-react";
 import { toast } from "sonner";
-import { formatDate, formatDateShort, formatHora, formatMZN, formatTime, toIsoDate, whatsappMensagemLink } from "@/lib/format";
-import { FATURA_STATUS, FORMA_PAGAMENTO_LABEL, FORMA_PAGAMENTO_OPTIONS } from "@/lib/status";
-import { descarregarPdf, nomeFicheiroFatura } from "@/lib/pdf";
-import { API_ENDPOINTS } from "@/lib/apiEndpoints";
-import { StatusBadge } from "@/atoms/StatusBadge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { QueryError } from "@/components/QueryError";
-import { InfiniteScrollTable } from "@/components/InfiniteScrollTable";
-import { useDebounce } from "@/hooks/useDebounce";
+import { formatDate, formatDateShort, formatHora, formatMZN, formatTime, toIsoDate, whatsappMensagemLink } from "@/shared/lib/format";
+import { FATURA_STATUS, FORMA_PAGAMENTO_LABEL, FORMA_PAGAMENTO_OPTIONS } from "@/shared/lib/status";
+import { descarregarPdf, nomeFicheiroFatura } from "@/shared/lib/pdf";
+import { API_ENDPOINTS } from "@/shared/api/apiEndpoints";
+import { StatusBadge } from "@/shared/components/StatusBadge";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
+import { QueryError } from "@/shared/components/QueryError";
+import { InfiniteScrollTable } from "@/shared/components/InfiniteScrollTable";
+import { useDebounce } from "@/shared/hooks/useDebounce";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
+} from "@/shared/ui/select";
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/shared/ui/dialog";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
-  useAdminAnularFatura,
-  useAdminFatura,
-  useAdminFaturas,
-  useAdminRelatorioCaixa,
-  useAdminPagarFatura,
-  useAdminReenviarFatura,
-} from "@/hooks/useAdminApi";
-import type { Fatura, FormaPagamento, StatusFatura } from "@/types/api";
+} from "@/shared/ui/alert-dialog";
+import { useAdminAnularFatura, useAdminFatura, useAdminFaturas, useAdminPagarFatura, useAdminReenviarFatura } from "@/modules/invoices/hooks/useInvoicesApi";
+import { useAdminRelatorioCaixa } from "@/modules/reports/hooks/useReportsApi";
+import type { Fatura, FormaPagamento, StatusFatura } from "@/modules/invoices/models";
 
 const mensagemWhatsapp = (f: Fatura) =>
   `Olá ${f.clienteNome.split(" ")[0]}! Segue a sua ${f.status === "PAGA" ? "fatura/recibo" : "fatura"} ` +
