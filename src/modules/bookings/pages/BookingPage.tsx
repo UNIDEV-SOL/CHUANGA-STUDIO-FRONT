@@ -5,23 +5,25 @@ import { Check, ArrowRight, ArrowLeft, Copy, Sparkles, Loader2 } from "lucide-re
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { formatDate, formatHora, formatMZN, todayIso } from "@/lib/format";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useAuth } from "@/context/AuthContext";
-import { cn } from "@/lib/utils";
-import { OfflineNotice } from "@/components/OfflineNotice";
-import { useCatalogo, usePublicProfissionais } from "@/hooks/useServicesApi";
-import { SeletorHorario } from "@/components/SeletorHorario";
-import { MoradaFields } from "@/components/MoradaFields";
-import { moradaParaApi, type Morada } from "@/lib/morada";
-import { API_ENDPOINTS } from "@/lib/apiEndpoints";
-import { useCriarMarcacao } from "@/hooks/useMinhaAreaApi";
-import { groupByCategory, type NormalizedService } from "@/lib/normalizeServico";
-import type { Marcacao, MetodoPagamento, Profissional } from "@/types/api";
-import { usePaginaTitulo } from "@/lib/seo";
-import { SENHA_DICA, senhaNovaSchema } from "@/lib/senha";
+import { formatDate, formatHora, formatMZN, todayIso } from "@/shared/lib/format";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
+import { useAuth } from "@/modules/auth/context/AuthContext";
+import { cn } from "@/shared/lib/utils";
+import { OfflineNotice } from "@/shared/components/OfflineNotice";
+import { useCatalogo } from "@/modules/catalog/hooks/useCatalogApi";
+import { usePublicProfissionais } from "@/modules/team/hooks/useTeamApi";
+import { SeletorHorario } from "@/modules/bookings/components/SeletorHorario";
+import { MoradaFields } from "@/modules/locations/components/MoradaFields";
+import { moradaParaApi, type Morada } from "@/modules/locations/lib/morada";
+import { API_ENDPOINTS } from "@/shared/api/apiEndpoints";
+import { useCriarMarcacao } from "@/modules/bookings/hooks/useBookingsApi";
+import { groupByCategory, type NormalizedService } from "@/modules/catalog/lib/normalizeServico";
+import type { Marcacao, MetodoPagamento } from "@/modules/bookings/models";
+import type { Profissional } from "@/modules/team/models";
+import { usePaginaTitulo } from "@/shared/lib/seo";
+import { SENHA_DICA, senhaNovaSchema } from "@/modules/auth/lib/senha";
 
 const STEPS = ["Serviços", "Data & hora", "Contacto", "Adiantamento", "Confirmado"] as const;
 
