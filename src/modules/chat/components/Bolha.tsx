@@ -3,15 +3,15 @@ import {
   Ban, Check, CheckCheck, ChevronDown, Copy, Download, FileText, Forward, Info, Loader2, Pause, Pencil, Pin, Play,
   Reply, SmilePlus, Star, StarOff, Trash2,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { parseDate } from "@/lib/format";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/shared/lib/utils";
+import { parseDate } from "@/shared/lib/format";
+import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { descarregarAnexo, useAnexoMensagem } from "@/hooks/useChatApi";
-import type { MensagemChat } from "@/types/api";
-import { EMOJIS_REACAO, corDe, duracao, formatarTexto, horaDe, tamanho } from "./util";
+} from "@/shared/ui/dropdown-menu";
+import { descarregarAnexo, useAnexoMensagem } from "@/modules/chat/hooks/useChatApi";
+import type { MensagemChat } from "@/modules/chat/models";
+import { EMOJIS_REACAO, corDe, duracao, formatarTexto, horaDe, tamanho } from "@/modules/chat/components/util";
 
 /** Fica verdadeiro até ao instante indicado e desliga-se sozinho. */
 function useAte(ate: string | null) {
