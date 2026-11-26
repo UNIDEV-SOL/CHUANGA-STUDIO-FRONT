@@ -1,17 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { Check, FileText, ImageIcon, Loader2, Lock, Mic, Paperclip, Pencil, Reply, Send, Smile, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-import { redimensionar } from "@/lib/imagem";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/shared/lib/utils";
+import { redimensionar } from "@/shared/lib/imagem";
+import { Button } from "@/shared/ui/button";
+import { Textarea } from "@/shared/ui/textarea";
+import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useAvisarAEscrever, useEditarMensagem, useEnviarAnexo, useEnviarMensagem } from "@/hooks/useChatApi";
-import type { MensagemChat } from "@/types/api";
-import { EMOJIS, duracao } from "./util";
+} from "@/shared/ui/dropdown-menu";
+import { useAvisarAEscrever, useEditarMensagem, useEnviarAnexo, useEnviarMensagem } from "@/modules/chat/hooks/useChatApi";
+import type { MensagemChat } from "@/modules/chat/models";
+import { EMOJIS, duracao } from "@/modules/chat/components/util";
 
 const MAX_FICHEIRO = 10 * 1024 * 1024;
 
