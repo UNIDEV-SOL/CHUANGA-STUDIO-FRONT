@@ -2,24 +2,27 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Calendar, CalendarClock, CalendarPlus, Sparkles, Phone, Mail, User, Loader2, Download, Receipt } from "lucide-react";
 import { toast } from "sonner";
-import { useAuth } from "@/context/AuthContext";
-import { formatDate, formatDateShort, formatDay, formatHora, formatMZN, formatMonthShort, parseDate } from "@/lib/format";
-import { descarregarPdf, nomeFicheiroFatura } from "@/lib/pdf";
-import { API_ENDPOINTS } from "@/lib/apiEndpoints";
-import { descarregarIcs, googleCalendarUrl } from "@/lib/calendario";
-import { RemarcarDialog } from "@/components/RemarcarDialog";
-import { TrocarSenhaDialog } from "@/components/TrocarSenhaDialog";
-import { StatusBadge } from "@/atoms/StatusBadge";
-import { Button } from "@/components/ui/button";
+import { useAuth } from "@/modules/auth/context/AuthContext";
+import { formatDate, formatDateShort, formatDay, formatHora, formatMZN, formatMonthShort, parseDate } from "@/shared/lib/format";
+import { descarregarPdf, nomeFicheiroFatura } from "@/shared/lib/pdf";
+import { API_ENDPOINTS } from "@/shared/api/apiEndpoints";
+import { descarregarIcs, googleCalendarUrl } from "@/modules/bookings/lib/calendario";
+import { RemarcarDialog } from "@/modules/bookings/components/RemarcarDialog";
+import { TrocarSenhaDialog } from "@/modules/auth/components/TrocarSenhaDialog";
+import { StatusBadge } from "@/shared/components/StatusBadge";
+import { Button } from "@/shared/ui/button";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { CartaoFidelizacao } from "@/components/CartaoFidelizacao";
-import { useMinhaAreaCancelarMarcacao, useMinhaAreaFaturas, useMinhaAreaMarcacoes, useMinhasSugestoes } from "@/hooks/useMinhaAreaApi";
-import { urlDaApi } from "@/lib/imagem";
-import type { Fatura, Marcacao } from "@/types/api";
-import { usePaginaTitulo } from "@/lib/seo";
+} from "@/shared/ui/alert-dialog";
+import { CartaoFidelizacao } from "@/modules/loyalty/components/CartaoFidelizacao";
+import { useMinhaAreaCancelarMarcacao, useMinhaAreaMarcacoes } from "@/modules/bookings/hooks/useBookingsApi";
+import { useMinhaAreaFaturas } from "@/modules/invoices/hooks/useInvoicesApi";
+import { useMinhasSugestoes } from "@/modules/gallery/hooks/useGalleryApi";
+import { urlDaApi } from "@/shared/lib/imagem";
+import type { Fatura } from "@/modules/invoices/models";
+import type { Marcacao } from "@/modules/bookings/models";
+import { usePaginaTitulo } from "@/shared/lib/seo";
 
 const when = (m: Marcacao) => parseDate(`${m.data}T${m.hora}`)?.getTime() ?? 0;
 const servicosLabel = (m: Marcacao, sep = " · ") => m.servicos.map((s) => s.nome).join(sep);
