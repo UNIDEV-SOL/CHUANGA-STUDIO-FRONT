@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { Eye, EyeOff, MessageSquareQuote } from "lucide-react";
 import { toast } from "sonner";
-import { formatDateShort } from "@/lib/format";
-import { Button } from "@/components/ui/button";
-import { QueryError } from "@/components/QueryError";
-import { InfiniteScrollTable } from "@/components/InfiniteScrollTable";
-import { Estrelas } from "@/components/Estrelas";
+import { formatDateShort } from "@/shared/lib/format";
+import { Button } from "@/shared/ui/button";
+import { QueryError } from "@/shared/components/QueryError";
+import { InfiniteScrollTable } from "@/shared/components/InfiniteScrollTable";
+import { Estrelas } from "@/modules/reviews/components/Estrelas";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
-import { usePublicarAvaliacao, useAvaliacoesAdmin, useResumoAvaliacoes } from "@/hooks/useFidelizacaoApi";
-import type { Avaliacao } from "@/types/api";
+} from "@/shared/ui/select";
+import { usePublicarAvaliacao, useAvaliacoesAdmin, useResumoAvaliacoes } from "@/modules/reviews/hooks/useReviewsApi";
+import type { Avaliacao } from "@/modules/reviews/models";
 
 export default function AdminReviewsPage() {
   const [respondida, setRespondida] = useState("true");
