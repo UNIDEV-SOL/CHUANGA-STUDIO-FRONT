@@ -1,7 +1,7 @@
 import { Building2, Code2, Mail, MapPin, Phone, UserRound } from "lucide-react";
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/shared/ui/dialog";
 
 const LINHAS = [
   { icon: Building2, titulo: "Propriedade & Edição", valor: "Chuanga Studio" },
