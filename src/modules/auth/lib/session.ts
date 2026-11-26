@@ -1,5 +1,5 @@
-import { createStore } from "./store";
-import type { AppUser } from "@/types";
+import { createStore } from "@/shared/lib/store";
+import type { AppUser } from "@/modules/auth/models";
 
 // Sessão = token JWT + utilizador autenticado. Fica num único store para que
 // o interceptor HTTP (fora do React) e o AuthContext partilhem o mesmo estado.
