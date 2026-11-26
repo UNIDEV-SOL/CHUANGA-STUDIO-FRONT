@@ -1,14 +1,10 @@
 import { Link } from "react-router-dom";
 import { Calendar, TrendingUp, Users, MessageSquare, ArrowUpRight } from "lucide-react";
-import { formatDate, formatDay, formatHora, formatMZN, formatMonthShort } from "@/lib/format";
-import { StatusBadge } from "@/atoms/StatusBadge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { QueryError } from "@/components/QueryError";
-import {
-  useAdminAtividadeRecente,
-  useAdminEstatisticas,
-  useAdminMarcacoesProximas,
-} from "@/hooks/useAdminApi";
+import { formatDate, formatDay, formatHora, formatMZN, formatMonthShort } from "@/shared/lib/format";
+import { StatusBadge } from "@/shared/components/StatusBadge";
+import { Skeleton } from "@/shared/ui/skeleton";
+import { QueryError } from "@/shared/components/QueryError";
+import { useAdminAtividadeRecente, useAdminEstatisticas, useAdminMarcacoesProximas } from "@/modules/reports/hooks/useReportsApi";
 
 export default function AdminOverviewPage() {
   const estatisticasQuery = useAdminEstatisticas();
