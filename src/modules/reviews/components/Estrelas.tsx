@@ -1,5 +1,5 @@
 import { Star } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib/utils";
 
 /** Estrelas só de leitura (ou clicáveis, com onEscolher). */
 export function Estrelas({
