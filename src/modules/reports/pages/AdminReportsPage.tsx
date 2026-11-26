@@ -2,15 +2,15 @@ import { useMemo, useState } from "react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Download, Loader2, Printer } from "lucide-react";
 import { toast } from "sonner";
-import { formatDateShort, formatMZN, toIsoDate } from "@/lib/format";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
-import { QueryError } from "@/components/QueryError";
-import { cn } from "@/lib/utils";
-import { useAdminRelatorioCaixa } from "@/hooks/useAdminApi";
-import { API_ENDPOINTS } from "@/lib/apiEndpoints";
-import { descarregarPdf } from "@/lib/pdf";
+import { formatDateShort, formatMZN, toIsoDate } from "@/shared/lib/format";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Skeleton } from "@/shared/ui/skeleton";
+import { QueryError } from "@/shared/components/QueryError";
+import { cn } from "@/shared/lib/utils";
+import { useAdminRelatorioCaixa } from "@/modules/reports/hooks/useReportsApi";
+import { API_ENDPOINTS } from "@/shared/api/apiEndpoints";
+import { descarregarPdf } from "@/shared/lib/pdf";
 
 type Preset = "hoje" | "7d" | "mes" | "mesPassado" | "outro";
 
