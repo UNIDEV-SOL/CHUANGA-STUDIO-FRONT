@@ -1,4 +1,4 @@
-import { SectionTitle } from "@/atoms/SectionTitle";
+import { SectionTitle } from "@/shared/components/SectionTitle";
 import { ShieldCheck, Sparkles, HeartHandshake, Clock, Award, Leaf } from "lucide-react";
 
 const ITEMS = [
