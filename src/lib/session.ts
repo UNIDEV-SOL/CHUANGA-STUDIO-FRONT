@@ -29,12 +29,17 @@ export function setSession(token: string, user: AppUser) {
   sessionStore.set({ token, user });
 }
 
+/** Troca só o token (ex.: depois de alterar a palavra-passe o backend emite um novo). */
+export function setSessionToken(token: string) {
+  sessionStore.set((prev) => ({ ...prev, token }));
+}
+
 export function setSessionUser(user: AppUser) {
   sessionStore.set((prev) => ({ ...prev, user }));
 }
 
 export type SessionEndReason = "logout" | "expired";
-type Listener = (reason: SessionEndReason) => void;
+type Listener = (reason: SessionEndReason, mensagem?: string) => void;
 const endListeners = new Set<Listener>();
 
 /** Notificado sempre que a sessão termina (logout manual ou 401). */
@@ -45,7 +50,8 @@ export function onSessionEnd(listener: Listener) {
   };
 }
 
-export function clearSession(reason: SessionEndReason = "logout") {
+/** `mensagem` = motivo exato vindo do backend (ex.: "A sua conta foi desativada."). */
+export function clearSession(reason: SessionEndReason = "logout", mensagem?: string) {
   const hadSession = !!sessionStore.get().token;
   sessionStore.set({ token: null, user: null });
   try {
@@ -53,5 +59,5 @@ export function clearSession(reason: SessionEndReason = "logout") {
   } catch {
     // ignore
   }
-  if (hadSession) endListeners.forEach((l) => l(reason));
+  if (hadSession) endListeners.forEach((l) => l(reason, mensagem));
 }
