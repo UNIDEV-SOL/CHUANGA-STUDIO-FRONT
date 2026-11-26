@@ -1,5 +1,5 @@
-import type { Marcacao } from "@/types/api";
-import { guardarFicheiro } from "./pdf";
+import type { Marcacao } from "@/modules/bookings/models";
+import { guardarFicheiro } from "@/shared/lib/pdf";
 
 // O estúdio está em Maputo (UTC+2, sem horário de verão): converte a hora local para UTC.
 const OFFSET_MAPUTO_HORAS = 2;
