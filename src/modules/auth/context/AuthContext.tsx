@@ -1,17 +1,17 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type { AppUser } from "@/types";
-import type { AutenticacaoResponse, CadastroRequest, Usuario } from "@/types/api";
-import { apiClient, extractApiData } from "@/lib/httpClient";
-import { API_ENDPOINTS } from "@/lib/apiEndpoints";
+import type { AppUser } from "@/modules/auth/models";
+import type { AutenticacaoResponse, CadastroRequest, Usuario } from "@/modules/auth/models";
+import { apiClient, extractApiData } from "@/shared/api/httpClient";
+import { API_ENDPOINTS } from "@/shared/api/apiEndpoints";
 import {
   clearSession,
   onSessionEnd,
   sessionStore,
   setSession,
   setSessionUser,
-} from "@/lib/session";
+} from "@/modules/auth/lib/session";
 
 interface SignUpInput {
   name: string;
