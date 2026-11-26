@@ -1,8 +1,8 @@
 import { Megaphone, Sparkles, Store, Users } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { initials } from "@/lib/format";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useFotoConversa } from "@/hooks/useChatApi";
+import { cn } from "@/shared/lib/utils";
+import { initials } from "@/shared/lib/format";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
+import { useFotoConversa } from "@/modules/chat/hooks/useChatApi";
 
 interface Props {
   id: string;
