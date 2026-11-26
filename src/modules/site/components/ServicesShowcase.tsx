@@ -1,8 +1,8 @@
 import { useMemo } from "react";
-import { SectionTitle } from "@/atoms/SectionTitle";
-import { getCategoryMeta } from "@/lib/normalizeServico";
-import { useCatalogo } from "@/hooks/useServicesApi";
-import { formatMZN } from "@/lib/format";
+import { SectionTitle } from "@/shared/components/SectionTitle";
+import { getCategoryMeta } from "@/modules/catalog/lib/normalizeServico";
+import { useCatalogo } from "@/modules/catalog/hooks/useCatalogApi";
+import { formatMZN } from "@/shared/lib/format";
 import { Link } from "react-router-dom";
 
 import { ArrowUpRight } from "lucide-react";
