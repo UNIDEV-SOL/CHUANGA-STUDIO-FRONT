@@ -1,5 +1,5 @@
 # Verifica o frontend e publica a imagem Docker no GitHub Container Registry (ghcr.io).
-# - push na main      -> ghcr.io/igortobias/chuanga-studio-frontend:latest (+ :sha-xxxxxxx)
+# - push na main      -> ghcr.io/unidev-sol/chuanga-studio-frontend:latest (+ :sha-xxxxxxx)
 # - tag v1.2.3        -> ...:1.2.3 e ...:1.2
 # - "Run workflow"    -> manualmente, a partir de qualquer branch
 name: Frontend - verificação e imagem Docker
@@ -17,7 +17,7 @@ permissions:
   packages: write
 
 env:
-  IMAGE: ghcr.io/igortobias/chuanga-studio-frontend
+  IMAGE: ghcr.io/unidev-sol/chuanga-studio-frontend
 
 jobs:
   check:

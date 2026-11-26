@@ -20,7 +20,7 @@ RUN yarn build
 FROM nginx:1.27-alpine
 LABEL org.opencontainers.image.title="chuanga-studio-frontend" \
       org.opencontainers.image.description="Site e painel do Chuanga Studio (React + nginx)" \
-      org.opencontainers.image.source="https://github.com/igortobias/CHUANGA-STUDIO-FRONT"
+      org.opencontainers.image.source="https://github.com/UNIDEV-SOL/CHUANGA-STUDIO-FRONT"
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 80

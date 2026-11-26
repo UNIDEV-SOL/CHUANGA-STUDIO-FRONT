@@ -3,7 +3,7 @@
 Site público e painel de administração do Chuanga Studio (estúdio de unhas em Maputo):
 **React 19 + TypeScript + Vite**, Tailwind 4, shadcn/ui (Radix), TanStack Query e React Router.
 
-O backend está em [CHUANGA-STUDIO-BACK](https://github.com/igortobias/CHUANGA-STUDIO-BACK).
+O backend está em [CHUANGA-STUDIO-BACK](https://github.com/UNIDEV-SOL/CHUANGA-STUDIO-BACK).
 
 ## Correr localmente
 
@@ -69,6 +69,6 @@ Imports sempre com o alias `@/` (ex.: `@/modules/bookings/hooks/useBookingsApi`)
 
 - `Dockerfile` — build com Node e imagem final com **nginx**, que serve o site e encaminha `/api` para o backend.
 - `nginx.conf` — configuração desse nginx (SPA, cache, `/api`, healthcheck em `/healthz`).
-- `.github/workflows/docker-publish.yml` — verifica e publica a imagem em `ghcr.io/igortobias/chuanga-studio-frontend`.
+- `.github/workflows/docker-publish.yml` — verifica e publica a imagem em `ghcr.io/unidev-sol/chuanga-studio-frontend`.
 
 O `compose.yaml` de produção e o passo a passo estão no backend, em `deploy/DEPLOY.md`.
