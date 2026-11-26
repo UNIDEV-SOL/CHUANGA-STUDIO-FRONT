@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { formatDate } from "@/lib/format";
-import { usePaginaTitulo } from "@/lib/seo";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Estrelas } from "@/components/Estrelas";
-import { usePedidoAvaliacao, useResponderAvaliacao } from "@/hooks/useFidelizacaoApi";
+import { formatDate } from "@/shared/lib/format";
+import { usePaginaTitulo } from "@/shared/lib/seo";
+import { Button } from "@/shared/ui/button";
+import { Textarea } from "@/shared/ui/textarea";
+import { Estrelas } from "@/modules/reviews/components/Estrelas";
+import { usePedidoAvaliacao, useResponderAvaliacao } from "@/modules/reviews/hooks/useReviewsApi";
 
 const LEGENDAS = ["", "Não gostei", "Podia ser melhor", "Bom", "Muito bom", "Adorei!"];
 
