@@ -1,24 +1,26 @@
 import { useEffect, useMemo, useState } from "react";
 import { Check, Gift, Loader2, Minus, Plus, Receipt, Stamp, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { formatMZN } from "@/lib/format";
-import { FORMA_PAGAMENTO_OPTIONS } from "@/lib/status";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
-import { ComboboxSelect } from "@/components/ui/combobox-select";
+import { formatMZN } from "@/shared/lib/format";
+import { FORMA_PAGAMENTO_OPTIONS } from "@/shared/lib/status";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
+import { Switch } from "@/shared/ui/switch";
+import { Textarea } from "@/shared/ui/textarea";
+import { ComboboxSelect } from "@/shared/ui/combobox-select";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/shared/ui/dialog";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
-import { useAdminEmitirFatura } from "@/hooks/useAdminApi";
-import { usePublicServicos } from "@/hooks/useServicesApi";
-import { consultarVale, useFidelizacaoCliente } from "@/hooks/useFidelizacaoApi";
-import type { Fatura, FormaPagamento, Marcacao, SaldoVale } from "@/types/api";
+} from "@/shared/ui/select";
+import { useAdminEmitirFatura } from "@/modules/invoices/hooks/useInvoicesApi";
+import { usePublicServicos } from "@/modules/catalog/hooks/useCatalogApi";
+import { consultarVale, useFidelizacaoCliente } from "@/modules/loyalty/hooks/useLoyaltyApi";
+import type { Fatura, FormaPagamento } from "@/modules/invoices/models";
+import type { Marcacao } from "@/modules/bookings/models";
+import type { SaldoVale } from "@/modules/loyalty/models";
 
 interface Linha {
   key: string;
