@@ -1,6 +1,6 @@
 import { Target, Eye, Gem, Handshake } from "lucide-react";
 import atelierImg from "@/assets/atelier-flatlay.jpg";
-import { SectionTitle } from "@/atoms/SectionTitle";
+import { SectionTitle } from "@/shared/components/SectionTitle";
 
 const PILLARS = [
   {
