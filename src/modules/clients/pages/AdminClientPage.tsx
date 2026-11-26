@@ -1,19 +1,19 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Search, MessageCircle } from "lucide-react";
-import { formatDateShort, formatMZN, initials, whatsappLink } from "@/lib/format";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
+import { formatDateShort, formatMZN, initials, whatsappLink } from "@/shared/lib/format";
+import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
+import { Input } from "@/shared/ui/input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
-import { QueryError } from "@/components/QueryError";
-import { InfiniteScrollTable } from "@/components/InfiniteScrollTable";
-import { FichaClienteDialog } from "@/components/FichaClienteDialog";
-import { useAdminClientes } from "@/hooks/useAdminApi";
-import { useDistritos, useProvincias } from "@/hooks/useServicesApi";
-import { useDebounce } from "@/hooks/useDebounce";
-import type { ClienteResumo } from "@/types/api";
+} from "@/shared/ui/select";
+import { QueryError } from "@/shared/components/QueryError";
+import { InfiniteScrollTable } from "@/shared/components/InfiniteScrollTable";
+import { FichaClienteDialog } from "@/modules/clients/components/FichaClienteDialog";
+import { useAdminClientes } from "@/modules/clients/hooks/useClientsApi";
+import { useDistritos, useProvincias } from "@/modules/locations/hooks/useLocationsApi";
+import { useDebounce } from "@/shared/hooks/useDebounce";
+import type { ClienteResumo } from "@/modules/clients/models";
 
 export default function AdminClientsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
