@@ -1,18 +1,13 @@
 import axios, { AxiosError } from "axios";
-import { API_ENDPOINTS } from "./apiEndpoints";
-import { clearSession, getToken } from "./session";
+import { ConfigValue } from "@/config";
+import { API_ENDPOINTS } from "@/shared/api/apiEndpoints";
+import { clearSession, getToken } from "@/modules/auth/lib/session";
 
 // O backend expõe tudo sob o context-path `/api` e os paths em API_ENDPOINTS
-// já incluem esse prefixo. Por isso a base é apenas o host — se o .env vier
-// com `/api` no fim, removemos para não gerar `/api/api/...`.
-const getApiBaseUrl = () => {
-  const fromEnv = (import.meta.env.VITE_API_URL as string | undefined)?.trim();
-  const base = fromEnv || "http://localhost:8080";
-  return base.replace(/\/+$/, "").replace(/\/api$/, "");
-};
-
+// já incluem esse prefixo. Por isso a base é apenas o host (ver config/index.ts);
+// em produção é vazia e os pedidos vão para o próprio domínio (o nginx encaminha /api).
 export const apiClient = axios.create({
-  baseURL: getApiBaseUrl(),
+  baseURL: ConfigValue.API_URL,
   headers: { "Content-Type": "application/json" },
 });
 
