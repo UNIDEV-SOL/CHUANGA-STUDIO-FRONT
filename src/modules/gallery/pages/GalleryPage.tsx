@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight, ImageOff, ImagePlus, X } from "lucide-react";
-import { CATEGORY_META } from "@/data/mock-services";
-import { urlDaApi } from "@/lib/imagem";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { FimDaLista } from "@/components/FimDaLista";
-import { useGaleriaPublica } from "@/hooks/useServicesApi";
-import { useAuth } from "@/context/AuthContext";
-import { AdicionarFotosDialog } from "@/components/AdicionarFotosDialog";
-import { usePaginaTitulo } from "@/lib/seo";
+import { CATEGORY_META } from "@/modules/catalog/data/mock-services";
+import { urlDaApi } from "@/shared/lib/imagem";
+import { cn } from "@/shared/lib/utils";
+import { Button } from "@/shared/ui/button";
+import { Skeleton } from "@/shared/ui/skeleton";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/shared/ui/dialog";
+import { FimDaLista } from "@/shared/components/FimDaLista";
+import { useGaleriaPublica } from "@/modules/gallery/hooks/useGalleryApi";
+import { useAuth } from "@/modules/auth/context/AuthContext";
+import { AdicionarFotosDialog } from "@/modules/gallery/components/AdicionarFotosDialog";
+import { usePaginaTitulo } from "@/shared/lib/seo";
 
 const CATEGORIAS = Object.entries(CATEGORY_META).map(([valor, m]) => ({ valor, label: m.label }));
 
