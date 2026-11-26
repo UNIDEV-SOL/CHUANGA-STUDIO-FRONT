@@ -1,4 +1,4 @@
-import type { Service, ServiceCategory } from "@/types";
+import type { Service, ServiceCategory } from "@/modules/catalog/models";
 
 // Preços em MZN — valores de referência, admin pode editar.
 export const SEED_SERVICES: Service[] = [
