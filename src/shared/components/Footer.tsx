@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Instagram, Facebook, MapPin, Phone, Clock, Heart } from "lucide-react";
-import { Logo } from "@/atoms/Logo";
-import { FichaTecnicaDialog } from "@/components/FichaTecnicaDialog";
+import { Logo } from "@/shared/components/Logo";
+import { FichaTecnicaDialog } from "@/shared/components/FichaTecnicaDialog";
 
 export function Footer() {
   return (
