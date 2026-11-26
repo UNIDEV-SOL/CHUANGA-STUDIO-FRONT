@@ -115,7 +115,7 @@ export function DetalhesPainel({ conversaId, modo, onFechar, onAbrirConversa, on
                   className="absolute bottom-1 right-1 h-9 w-9 rounded-full bg-primary text-primary-foreground grid place-items-center shadow">
                   <Camera className="h-4 w-4" />
                 </button>
-                <input ref={fotoRef} type="file" accept="image/*" hidden onChange={async (e) => {
+                <input ref={fotoRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden onChange={async (e) => {
                   const f = e.target.files?.[0];
                   e.target.value = "";
                   if (!f) return;
