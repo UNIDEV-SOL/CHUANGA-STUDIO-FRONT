@@ -21,6 +21,7 @@ import { useCriarMarcacao } from "@/hooks/useMinhaAreaApi";
 import { groupByCategory, type NormalizedService } from "@/lib/normalizeServico";
 import type { Marcacao, MetodoPagamento, Profissional } from "@/types/api";
 import { usePaginaTitulo } from "@/lib/seo";
+import { SENHA_DICA, senhaNovaSchema } from "@/lib/senha";
 
 const STEPS = ["Serviços", "Data & hora", "Contacto", "Adiantamento", "Confirmado"] as const;
 
@@ -39,7 +40,7 @@ const contactSchema = z.object({
   email: z.string().trim().email("Email inválido.").max(120),
 });
 
-const passwordSchema = z.string().min(6, "A palavra-passe deve ter pelo menos 6 caracteres.").max(64);
+const passwordSchema = senhaNovaSchema;
 
 export default function BookingPage() {
   usePaginaTitulo("Marcar online", { descricao: "Marque o seu atendimento no Chuanga Studio em poucos minutos: escolha o serviço, o dia e a hora." });
@@ -430,7 +431,7 @@ function StepContact({
           <div className="md:col-span-2">
             <Label htmlFor="bk-password">Palavra-passe (para a sua conta)</Label>
             <Input id="bk-password" type="password" autoComplete="new-password" value={form.password} onChange={set("password")} className="h-11 mt-1.5" />
-            <p className="text-[11px] text-muted-foreground mt-1">Mínimo 6 caracteres.</p>
+            <p className="text-[11px] text-muted-foreground mt-1">{SENHA_DICA}</p>
           </div>
         )}
         {!hasAccount && (
