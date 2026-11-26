@@ -1,6 +1,6 @@
-import { CATEGORY_META } from "@/data/mock-services";
-import type { Service, ServiceCategory } from "@/types";
-import type { Servico } from "@/types/api";
+import { CATEGORY_META } from "@/modules/catalog/data/mock-services";
+import type { Service, ServiceCategory } from "@/modules/catalog/models";
+import type { Servico } from "@/modules/catalog/models";
 
 /**
  * A API devolve os campos em português (nome, categoria, preco, duracaoMinutos,
