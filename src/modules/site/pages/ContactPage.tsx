@@ -1,7 +1,7 @@
-import { SectionTitle } from "@/atoms/SectionTitle";
+import { SectionTitle } from "@/shared/components/SectionTitle";
 import { MapPin, Phone, Mail, Clock, Instagram, Facebook } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { usePaginaTitulo } from "@/lib/seo";
+import { Button } from "@/shared/ui/button";
+import { usePaginaTitulo } from "@/shared/lib/seo";
 
 export default function ContactPage() {
   usePaginaTitulo("Contacto", { descricao: "Fale com o Chuanga Studio em Maputo: telefone, WhatsApp e email." });
