@@ -2,7 +2,7 @@ import {
     Popover,
     PopoverContent,
     PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/shared/ui/popover"
 import {
     Command,
     CommandEmpty,
@@ -10,10 +10,10 @@ import {
     CommandInput,
     CommandItem,
     CommandList,
-} from "@/components/ui/command"
-import { FormControl, FormLabel } from "./form"
-import { Button } from "./button"
-import { cn } from "@/lib/utils"
+} from "@/shared/ui/command"
+import { FormControl, FormLabel } from "@/shared/ui/form"
+import { Button } from "@/shared/ui/button"
+import { cn } from "@/shared/lib/utils"
 import { Check, ChevronsUpDown } from "lucide-react"
 
 
