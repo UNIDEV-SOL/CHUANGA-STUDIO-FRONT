@@ -5,6 +5,7 @@ export const API_ENDPOINTS = {
     entrar: `/api/auth/entrar`,
     cadastrar: `/api/auth/cadastrar`,
     recuperarSenha: `/api/auth/recuperar-senha`,
+    verificarCodigo: `/api/auth/recuperar-senha/verificar`,
     redefinirSenha: `/api/auth/redefinir-senha`,
   },
   publico: {
