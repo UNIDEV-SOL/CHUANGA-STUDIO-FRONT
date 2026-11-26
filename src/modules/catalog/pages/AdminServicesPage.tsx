@@ -2,29 +2,29 @@ import { useState } from "react";
 import { Plus, Pencil, Trash2, Loader2, EyeOff, Search } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { formatMZN } from "@/lib/format";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { InfiniteScrollTable } from "@/components/InfiniteScrollTable";
-import { useDebounce } from "@/hooks/useDebounce";
-import { QueryError } from "@/components/QueryError";
+import { formatMZN } from "@/shared/lib/format";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
+import { Textarea } from "@/shared/ui/textarea";
+import { Switch } from "@/shared/ui/switch";
+import { InfiniteScrollTable } from "@/shared/components/InfiniteScrollTable";
+import { useDebounce } from "@/shared/hooks/useDebounce";
+import { QueryError } from "@/shared/components/QueryError";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
+} from "@/shared/ui/select";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/shared/ui/dialog";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { CATEGORY_META } from "@/data/mock-services";
-import { resolveCategory } from "@/lib/normalizeServico";
-import type { Servico, ServicoRequest } from "@/types/api";
-import { useAdminEliminarServico, useAdminServicos, useAdminSalvarServico } from "@/hooks/useServicesApi";
+} from "@/shared/ui/alert-dialog";
+import { CATEGORY_META } from "@/modules/catalog/data/mock-services";
+import { resolveCategory } from "@/modules/catalog/lib/normalizeServico";
+import type { Servico, ServicoRequest } from "@/modules/catalog/models";
+import { useAdminEliminarServico, useAdminServicos, useAdminSalvarServico } from "@/modules/catalog/hooks/useCatalogApi";
 
 interface Draft {
   id?: string;
