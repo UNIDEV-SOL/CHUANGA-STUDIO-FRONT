@@ -1,21 +1,21 @@
 import { useEffect, useRef, useState } from "react";
 import { ImagePlus, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
-import { CATEGORY_META } from "@/data/mock-services";
-import { prepararFoto, tituloDoFicheiro } from "@/lib/imagem";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
+import { CATEGORY_META } from "@/modules/catalog/data/mock-services";
+import { prepararFoto, tituloDoFicheiro } from "@/shared/lib/imagem";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
+import { Switch } from "@/shared/ui/switch";
+import { Textarea } from "@/shared/ui/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
+} from "@/shared/ui/select";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
-} from "@/components/ui/dialog";
-import { useCarregarFoto } from "@/hooks/useAdminApi";
-import { useSugerirFoto } from "@/hooks/useMinhaAreaApi";
+} from "@/shared/ui/dialog";
+import { useCarregarFoto } from "@/modules/gallery/hooks/useGalleryApi";
+import { useSugerirFoto } from "@/modules/gallery/hooks/useGalleryApi";
 
 const CATEGORIAS = Object.entries(CATEGORY_META).map(([valor, m]) => ({ valor, label: m.label }));
 
