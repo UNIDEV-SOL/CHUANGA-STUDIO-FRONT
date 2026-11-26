@@ -1,4 +1,4 @@
-import { apiClient } from "./httpClient";
+import { apiClient } from "@/shared/api/httpClient";
 
 /**
  * Reduz uma foto no browser (canvas) antes de a enviar: fotos de telemóvel têm 3–8 MB,
