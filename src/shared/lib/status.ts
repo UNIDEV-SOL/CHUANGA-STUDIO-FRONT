@@ -1,4 +1,6 @@
-import type { FormaPagamento, StatusCotacao, StatusFatura, StatusMarcacao } from "@/types/api";
+import type { FormaPagamento, StatusFatura } from "@/modules/invoices/models";
+import type { StatusCotacao } from "@/modules/quotations/models";
+import type { StatusMarcacao } from "@/modules/bookings/models";
 
 export const MARCACAO_STATUS: Record<StatusMarcacao, { label: string; cls: string }> = {
   AGUARDA_CONFIRMACAO: {
