@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient, extractApiData } from "@/lib/httpClient";
+import { setSessionToken } from "@/lib/session";
 import { API_ENDPOINTS } from "@/lib/apiEndpoints";
 import { buscarPagina, buscarTudo, useInfiniteList, type Filtros } from "@/lib/pagination";
 import type {
@@ -357,7 +358,10 @@ export function useAdminAtivarUtilizador() {
 export function useTrocarSenha() {
   return useMutation({
     mutationFn: async (payload: { senhaAtual: string; novaSenha: string }) => {
-      await apiClient.patch(API_ENDPOINTS.minhaArea.senha, payload);
+      const res = await apiClient.patch(API_ENDPOINTS.minhaArea.senha, payload);
+      // O backend termina as sessões antigas (incluindo esta) e devolve um token novo.
+      const dados = extractApiData<{ token: string }>(res.data);
+      if (dados?.token) setSessionToken(dados.token);
     },
   });
 }
