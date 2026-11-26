@@ -1,19 +1,19 @@
 import { useMemo, useState } from "react";
-import { SectionTitle } from "@/atoms/SectionTitle";
-import { formatMZN } from "@/lib/format";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { SectionTitle } from "@/shared/components/SectionTitle";
+import { formatMZN } from "@/shared/lib/format";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
+import { Textarea } from "@/shared/ui/textarea";
 import { Check, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib/utils";
 import { z } from "zod";
-import { useCatalogo } from "@/hooks/useServicesApi";
-import { useCriarCotacao } from "@/hooks/useMinhaAreaApi";
-import { groupByCategory } from "@/lib/normalizeServico";
-import { OfflineNotice } from "@/components/OfflineNotice";
-import { usePaginaTitulo } from "@/lib/seo";
+import { useCatalogo } from "@/modules/catalog/hooks/useCatalogApi";
+import { useCriarCotacao } from "@/modules/quotations/hooks/useQuotationsApi";
+import { groupByCategory } from "@/modules/catalog/lib/normalizeServico";
+import { OfflineNotice } from "@/shared/components/OfflineNotice";
+import { usePaginaTitulo } from "@/shared/lib/seo";
 
 const schema = z.object({
   clientName: z.string().trim().min(2, "Indique o seu nome.").max(80),
