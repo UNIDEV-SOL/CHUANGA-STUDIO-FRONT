@@ -1,5 +1,4 @@
-// Base URL já vem do VITE_API_URL (ex: http://localhost:8080/api)
-// Então aqui usamos apenas os paths a partir de `/api`.
+// A base (host) vem de config/index.ts; aqui ficam só os paths, já com o prefixo `/api`.
 export const API_ENDPOINTS = {
   auth: {
     entrar: `/api/auth/entrar`,
