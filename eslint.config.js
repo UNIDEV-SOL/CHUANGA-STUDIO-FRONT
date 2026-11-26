@@ -21,7 +21,7 @@ export default defineConfig([
   },
   {
     // Componentes shadcn/ui vendorizados: exportam variantes/hooks junto dos componentes.
-    files: ['src/components/ui/**/*.{ts,tsx}'],
+    files: ['src/shared/ui/**/*.{ts,tsx}'],
     rules: {
       'react-refresh/only-export-components': 'off',
       '@typescript-eslint/no-empty-object-type': 'off',
