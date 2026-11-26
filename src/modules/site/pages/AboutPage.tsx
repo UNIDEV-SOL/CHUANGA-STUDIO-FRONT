@@ -1,8 +1,8 @@
-import { SectionTitle } from "@/atoms/SectionTitle";
+import { SectionTitle } from "@/shared/components/SectionTitle";
 import studio from "@/assets/studio-interior.jpg";
 import technician from "@/assets/technician.jpg";
 import { ShieldCheck, Sparkles, HeartHandshake, Award } from "lucide-react";
-import { usePaginaTitulo } from "@/lib/seo";
+import { usePaginaTitulo } from "@/shared/lib/seo";
 
 export default function AboutPage() {
   usePaginaTitulo("Sobre nós", { descricao: "Conheça o Chuanga Studio, estúdio de unhas em Maputo: a equipa, o espaço e a forma como cuidamos de cada cliente." });
