@@ -26,6 +26,7 @@ import {
   useAdminUtilizadores,
 } from "@/hooks/useAdminApi";
 import type { Profissional } from "@/types/api";
+import { SENHA_DICA, erroSenha } from "@/lib/senha";
 
 type ProfForm = { id?: string; nome: string; telefone: string; ativo: boolean; ordem: number };
 
@@ -68,7 +69,8 @@ export default function AdminTeamPage() {
 
   async function criarAdmin() {
     if (!novoAdmin) return;
-    if (novoAdmin.senha.length < 8) return toast.error("A palavra-passe deve ter pelo menos 8 caracteres.");
+    const erro = erroSenha(novoAdmin.senha);
+    if (erro) return toast.error(erro);
     const ok = await run(criarUtilizador.mutateAsync({
       nome: novoAdmin.nome.trim(),
       email: novoAdmin.email.trim(),
@@ -225,7 +227,7 @@ export default function AdminTeamPage() {
               <div>
                 <Label htmlFor="adm-senha">Palavra-passe provisória</Label>
                 <Input id="adm-senha" type="password" autoComplete="new-password" value={novoAdmin.senha} onChange={(e) => setNovoAdmin({ ...novoAdmin, senha: e.target.value })} className="h-10 mt-1" />
-                <p className="text-[11px] text-muted-foreground mt-1">Mínimo 8 caracteres.</p>
+                <p className="text-[11px] text-muted-foreground mt-1">{SENHA_DICA}</p>
               </div>
             </div>
           )}
