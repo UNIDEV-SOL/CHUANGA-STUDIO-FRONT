@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { Calendar as CalIcon, CalendarX, Clock, Loader2 } from "lucide-react";
-import { formatHora, todayIso } from "@/lib/format";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
-import { useDisponibilidade } from "@/hooks/useServicesApi";
+import { formatHora, todayIso } from "@/shared/lib/format";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
+import { cn } from "@/shared/lib/utils";
+import { useDisponibilidade } from "@/modules/schedule/hooks/useScheduleApi";
 
 /** Data + horas livres vindas do backend (horário, pausa, dias fechados e ocupação). */
 export function SeletorHorario({
