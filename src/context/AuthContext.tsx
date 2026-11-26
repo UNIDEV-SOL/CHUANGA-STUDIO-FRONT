@@ -31,6 +31,8 @@ interface AuthContextValue {
   signIn: (email: string, password: string) => Promise<AppUser>;
   signUp: (input: SignUpInput) => Promise<AppUser>;
   signOut: () => void;
+  /** Último passo da recuperação por código: grava a nova palavra-passe e entra logo. */
+  redefinirSenha: (token: string, novaSenha: string, confirmacaoSenha: string) => Promise<AppUser>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -72,9 +74,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(
     () =>
-      onSessionEnd((reason) => {
+      onSessionEnd((reason, mensagem) => {
         queryClient.clear();
-        if (reason === "expired") toast.error("Sessão expirada. Inicie sessão novamente.");
+        if (reason === "expired") toast.error(mensagem ?? "Sessão expirada. Inicie sessão novamente.");
       }),
     [queryClient],
   );
@@ -107,6 +109,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [authenticate],
   );
 
+  const redefinirSenha = useCallback(
+    (token: string, novaSenha: string, confirmacaoSenha: string) =>
+      authenticate(API_ENDPOINTS.auth.redefinirSenha, { token, novaSenha, confirmacaoSenha }),
+    [authenticate],
+  );
+
   const signOut = useCallback(() => clearSession("logout"), []);
 
   const value = useMemo<AuthContextValue>(
@@ -118,8 +126,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signIn,
       signUp,
       signOut,
+      redefinirSenha,
     }),
-    [token, user, signIn, signUp, signOut],
+    [token, user, signIn, signUp, signOut, redefinirSenha],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
