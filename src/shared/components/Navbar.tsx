@@ -1,8 +1,8 @@
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Menu, X, User2, LayoutDashboard, LogOut, MessagesSquare } from "lucide-react";
-import { useChatNaoLidas } from "@/hooks/useChatApi";
-import { Button } from "@/components/ui/button";
+import { useChatNaoLidas } from "@/modules/chat/hooks/useChatApi";
+import { Button } from "@/shared/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,12 +10,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
-import { useAuth } from "@/context/AuthContext";
-import { Logo } from "@/atoms/Logo";
-import { initials as getInitials } from "@/lib/format";
+} from "@/shared/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
+import { cn } from "@/shared/lib/utils";
+import { useAuth } from "@/modules/auth/context/AuthContext";
+import { Logo } from "@/shared/components/Logo";
+import { initials as getInitials } from "@/shared/lib/format";
 
 const NAV = [
   { to: "/", label: "Início" },
