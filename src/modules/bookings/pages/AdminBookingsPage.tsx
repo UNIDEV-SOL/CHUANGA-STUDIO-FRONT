@@ -2,36 +2,29 @@ import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Search, Trash2, Check, Clock, Phone, User, Loader2, ChevronRight, Receipt, CalendarClock, AlertTriangle, UserRound } from "lucide-react";
 import { toast } from "sonner";
-import { formatMZN, formatDate, formatHora } from "@/lib/format";
-import { MARCACAO_STATUS_OPTIONS } from "@/lib/status";
-import { StatusBadge } from "@/atoms/StatusBadge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { QueryError } from "@/components/QueryError";
-import { InfiniteScrollTable } from "@/components/InfiniteScrollTable";
-import { useDebounce } from "@/hooks/useDebounce";
-import { FecharContaDialog } from "@/components/FecharContaDialog";
-import { RemarcarDialog } from "@/components/RemarcarDialog";
+import { formatMZN, formatDate, formatHora } from "@/shared/lib/format";
+import { MARCACAO_STATUS_OPTIONS } from "@/shared/lib/status";
+import { StatusBadge } from "@/shared/components/StatusBadge";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { QueryError } from "@/shared/components/QueryError";
+import { InfiniteScrollTable } from "@/shared/components/InfiniteScrollTable";
+import { useDebounce } from "@/shared/hooks/useDebounce";
+import { FecharContaDialog } from "@/modules/invoices/components/FecharContaDialog";
+import { RemarcarDialog } from "@/modules/bookings/components/RemarcarDialog";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
+} from "@/shared/ui/select";
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/shared/ui/dialog";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
-  useAdminAtualizarStatusMarcacao,
-  useAdminConfirmarPagamento,
-  useAdminEliminarMarcacao,
-  useAdminMarcacoes,
-  useAdminAtribuirProfissional,
-  useAdminMarcacao,
-  useAdminProfissionais,
-} from "@/hooks/useAdminApi";
-import type { Marcacao, StatusMarcacao } from "@/types/api";
+} from "@/shared/ui/alert-dialog";
+import { useAdminAtualizarStatusMarcacao, useAdminConfirmarPagamento, useAdminEliminarMarcacao, useAdminMarcacoes, useAdminAtribuirProfissional, useAdminMarcacao } from "@/modules/bookings/hooks/useBookingsApi";
+import { useAdminProfissionais } from "@/modules/team/hooks/useTeamApi";
+import type { Marcacao, StatusMarcacao } from "@/modules/bookings/models";
 
 const METODO_LABEL: Record<string, string> = { MPESA: "M-Pesa", EMOLA: "e-Mola" };
 
