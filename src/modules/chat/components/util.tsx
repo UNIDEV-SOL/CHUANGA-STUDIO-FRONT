@@ -1,5 +1,5 @@
 import { Fragment, type ReactNode } from "react";
-import { parseDate } from "@/lib/format";
+import { parseDate } from "@/shared/lib/format";
 
 /** Rótulo do dia para os separadores ("Hoje", "Ontem", "3 de outubro"). */
 export function rotuloDia(iso: string) {
