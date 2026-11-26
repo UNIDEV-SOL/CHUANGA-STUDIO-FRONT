@@ -3,9 +3,9 @@ import portfolioNeon from "@/assets/portfolio-neon.jpg";
 import technician from "@/assets/technician.jpg";
 import studio from "@/assets/studio-interior.jpg";
 import { Link } from "react-router-dom";
-import { SectionTitle } from "@/atoms/SectionTitle";
-import { useGaleriaPublica } from "@/hooks/useServicesApi";
-import { urlDaApi } from "@/lib/imagem";
+import { SectionTitle } from "@/shared/components/SectionTitle";
+import { useGaleriaPublica } from "@/modules/gallery/hooks/useGalleryApi";
+import { urlDaApi } from "@/shared/lib/imagem";
 
 const TILES = [
   { src: portfolioNeon, label: "Neon French", tall: true },
