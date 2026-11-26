@@ -4,16 +4,11 @@ import {
   Bell, CalendarCheck, CalendarClock, CalendarPlus, CalendarX, CheckCheck, Loader2, MessageSquare, Receipt, UserPlus, Wallet,
 } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-import { relative } from "@/lib/format";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import {
-  useMarcarNotificacaoLida,
-  useMarcarTodasNotificacoesLidas,
-  useNotificacoes,
-  useNotificacoesResumo,
-} from "@/hooks/useAdminApi";
-import type { Notificacao } from "@/types/api";
+import { cn } from "@/shared/lib/utils";
+import { relative } from "@/shared/lib/format";
+import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover";
+import { useMarcarNotificacaoLida, useMarcarTodasNotificacoesLidas, useNotificacoes, useNotificacoesResumo } from "@/modules/notifications/hooks/useNotificationsApi";
+import type { Notificacao } from "@/modules/notifications/models";
 
 const ICONES: Record<string, typeof Bell> = {
   MARCACAO_NOVA: CalendarPlus,
