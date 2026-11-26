@@ -1,4 +1,4 @@
-import { apiClient } from "./httpClient";
+import { apiClient } from "@/shared/api/httpClient";
 
 /** PDF de um endpoint autenticado (o token vai no header, por isso não basta um <a href>). */
 export async function obterPdf(url: string) {
