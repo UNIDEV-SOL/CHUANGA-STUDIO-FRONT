@@ -1,6 +1,6 @@
 import { Check, Gift, Stamp } from "lucide-react";
-import { formatMZN } from "@/lib/format";
-import { useMinhaFidelizacao } from "@/hooks/useFidelizacaoApi";
+import { formatMZN } from "@/shared/lib/format";
+import { useMinhaFidelizacao } from "@/modules/loyalty/hooks/useLoyaltyApi";
 
 /** Cartão de carimbos na "Minha área": um carimbo por visita faturada. */
 export function CartaoFidelizacao() {
