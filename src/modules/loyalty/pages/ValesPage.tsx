@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Gift, Loader2, Search } from "lucide-react";
-import { formatDate, formatMZN } from "@/lib/format";
-import { usePaginaTitulo } from "@/lib/seo";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { consultarVale } from "@/hooks/useFidelizacaoApi";
-import type { SaldoVale } from "@/types/api";
+import { formatDate, formatMZN } from "@/shared/lib/format";
+import { usePaginaTitulo } from "@/shared/lib/seo";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { consultarVale } from "@/modules/loyalty/hooks/useLoyaltyApi";
+import type { SaldoVale } from "@/modules/loyalty/models";
 
 /** Vales-oferta: explica como oferecer e deixa consultar o saldo pelo código. */
 export default function ValesPage() {
