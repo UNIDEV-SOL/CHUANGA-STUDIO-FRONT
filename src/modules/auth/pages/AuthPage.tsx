@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useAuth } from "@/context/AuthContext";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
+import { useAuth } from "@/modules/auth/context/AuthContext";
 import { toast } from "sonner";
-import { Logo } from "@/atoms/Logo";
-import { MoradaFields } from "@/components/MoradaFields";
-import { moradaParaApi, type Morada } from "@/lib/morada";
+import { Logo } from "@/shared/components/Logo";
+import { MoradaFields } from "@/modules/locations/components/MoradaFields";
+import { moradaParaApi, type Morada } from "@/modules/locations/lib/morada";
 import { z } from "zod";
-import type { AppUser } from "@/types";
-import { usePaginaTitulo } from "@/lib/seo";
-import { SENHA_DICA, senhaNovaSchema } from "@/lib/senha";
+import type { AppUser } from "@/modules/auth/models";
+import { usePaginaTitulo } from "@/shared/lib/seo";
+import { SENHA_DICA, senhaNovaSchema } from "@/modules/auth/lib/senha";
 
 // Regras alinhadas com LoginRequest / CadastroRequest do backend.
 const loginSchema = z.object({
