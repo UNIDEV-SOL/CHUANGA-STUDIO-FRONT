@@ -1,5 +1,5 @@
-import { ChatPage } from "@/components/chat/ChatPage";
-import { usePaginaTitulo } from "@/lib/seo";
+import { ChatPage } from "@/modules/chat/components/ChatPage";
+import { usePaginaTitulo } from "@/shared/lib/seo";
 
 export default function ClientChatPage() {
   usePaginaTitulo("Mensagens", { indexar: false });
