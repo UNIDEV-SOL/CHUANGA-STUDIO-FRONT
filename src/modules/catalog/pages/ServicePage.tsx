@@ -2,15 +2,15 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, ArrowRight, Loader2 } from "lucide-react";
 
-import { SectionTitle } from "@/atoms/SectionTitle";
-import { formatMZN } from "@/lib/format";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { useCatalogo } from "@/hooks/useServicesApi";
-import { groupByCategory } from "@/lib/normalizeServico";
-import { OfflineNotice } from "@/components/OfflineNotice";
-import { usePaginaTitulo } from "@/lib/seo";
+import { SectionTitle } from "@/shared/components/SectionTitle";
+import { formatMZN } from "@/shared/lib/format";
+import { Input } from "@/shared/ui/input";
+import { Button } from "@/shared/ui/button";
+import { cn } from "@/shared/lib/utils";
+import { useCatalogo } from "@/modules/catalog/hooks/useCatalogApi";
+import { groupByCategory } from "@/modules/catalog/lib/normalizeServico";
+import { OfflineNotice } from "@/shared/components/OfflineNotice";
+import { usePaginaTitulo } from "@/shared/lib/seo";
 
 const strip = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
