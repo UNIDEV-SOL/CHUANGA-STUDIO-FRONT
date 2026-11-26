@@ -213,9 +213,9 @@ export function Compositor({
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
-            <input ref={fotoRef} type="file" accept="image/*" hidden onChange={(e) => void escolherFoto(e.target.files?.[0])} />
+            <input ref={fotoRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden onChange={(e) => void escolherFoto(e.target.files?.[0])} />
             <input ref={docRef} type="file" hidden
-              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,application/pdf"
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.odt,.ods,.txt,.csv,application/pdf"
               onChange={(e) => void escolherDocumento(e.target.files?.[0])} />
             <Textarea
               ref={areaRef}
