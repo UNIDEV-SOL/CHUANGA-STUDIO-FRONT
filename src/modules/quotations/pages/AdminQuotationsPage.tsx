@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { Check, Archive, Phone, Mail, MessageCircle, Search } from "lucide-react";
 import { toast } from "sonner";
-import { formatDate, formatMZN, relative, whatsappLink } from "@/lib/format";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { InfiniteScrollTable } from "@/components/InfiniteScrollTable";
-import { useDebounce } from "@/hooks/useDebounce";
-import { StatusBadge } from "@/atoms/StatusBadge";
-import { QueryError } from "@/components/QueryError";
-import { useAdminAtualizarCotacao, useAdminCotacoes } from "@/hooks/useAdminApi";
-import type { Cotacao, StatusCotacao } from "@/types/api";
+import { formatDate, formatMZN, relative, whatsappLink } from "@/shared/lib/format";
+import { cn } from "@/shared/lib/utils";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { InfiniteScrollTable } from "@/shared/components/InfiniteScrollTable";
+import { useDebounce } from "@/shared/hooks/useDebounce";
+import { StatusBadge } from "@/shared/components/StatusBadge";
+import { QueryError } from "@/shared/components/QueryError";
+import { useAdminAtualizarCotacao, useAdminCotacoes } from "@/modules/quotations/hooks/useQuotationsApi";
+import type { Cotacao, StatusCotacao } from "@/modules/quotations/models";
 
 const TABS: { value: StatusCotacao | "TODAS"; label: string }[] = [
   { value: "NOVO", label: "Novas" },
