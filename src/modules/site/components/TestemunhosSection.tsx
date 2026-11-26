@@ -1,8 +1,8 @@
 import { Quote } from "lucide-react";
-import { SectionTitle } from "@/atoms/SectionTitle";
-import { Estrelas } from "@/components/Estrelas";
-import { useAvaliacoesPublicas, useResumoAvaliacoes } from "@/hooks/useFidelizacaoApi";
-import { useNotaNoJsonLd } from "@/lib/seo";
+import { SectionTitle } from "@/shared/components/SectionTitle";
+import { Estrelas } from "@/modules/reviews/components/Estrelas";
+import { useAvaliacoesPublicas, useResumoAvaliacoes } from "@/modules/reviews/hooks/useReviewsApi";
+import { useNotaNoJsonLd } from "@/shared/lib/seo";
 
 /** Avaliações escolhidas pela equipa. Sem nenhuma publicada, a secção não aparece. */
 export function TestemunhosSection() {
