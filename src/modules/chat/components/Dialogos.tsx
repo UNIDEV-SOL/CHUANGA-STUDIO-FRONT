@@ -1,24 +1,24 @@
 import { useEffect, useState } from "react";
 import { Check, CheckCheck, Loader2, Search, Star, Users } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-import { initials } from "@/lib/format";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/shared/lib/utils";
+import { initials } from "@/shared/lib/format";
+import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
+import { Switch } from "@/shared/ui/switch";
+import { Textarea } from "@/shared/ui/textarea";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
-} from "@/components/ui/dialog";
-import { useDebounce } from "@/hooks/useDebounce";
+} from "@/shared/ui/dialog";
+import { useDebounce } from "@/shared/hooks/useDebounce";
 import {
   useAbrirConversaCom, useContactos, useConversas, useCriarGrupo, useEncaminhar, useFavoritas, useGestaoGrupo, useInfoMensagem,
-} from "@/hooks/useChatApi";
-import type { ContactoChat, MensagemChat } from "@/types/api";
-import { AvatarConversa } from "./AvatarConversa";
-import { horaDe, quando, rotuloDia } from "./util";
+} from "@/modules/chat/hooks/useChatApi";
+import type { ContactoChat, MensagemChat } from "@/modules/chat/models";
+import { AvatarConversa } from "@/modules/chat/components/AvatarConversa";
+import { horaDe, quando, rotuloDia } from "@/modules/chat/components/util";
 
 function ListaContactos({
   busca, setBusca, contactos, aCarregar, escolhidos, onEscolher, multipla, excluir = [],
