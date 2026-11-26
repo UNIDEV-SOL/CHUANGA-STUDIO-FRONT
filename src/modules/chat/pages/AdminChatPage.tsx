@@ -1,4 +1,4 @@
-import { ChatPage } from "@/components/chat/ChatPage";
+import { ChatPage } from "@/modules/chat/components/ChatPage";
 
 export default function AdminChatPage() {
   return (
