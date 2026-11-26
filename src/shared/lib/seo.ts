@@ -1,7 +1,8 @@
 import { useEffect } from "react";
+import { ConfigValue } from "@/config";
 
 const SITE = "Chuanga Studio";
-const URL_SITE = "https://chuanga-studio.vercel.app";
+const URL_SITE = ConfigValue.SITE_URL;
 const DESCRICAO_PADRAO =
   "Chuanga Studio: estúdio de unhas em Maputo. Manicure, pedicure, alongamento em gel e acrílico, nail art e spa. Marque online em poucos minutos.";
 
