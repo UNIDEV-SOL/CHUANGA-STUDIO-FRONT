@@ -1,20 +1,15 @@
 import { useEffect, useState } from "react";
 import { CalendarX, Loader2, Plus, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { formatDate, formatHora, todayIso } from "@/lib/format";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Skeleton } from "@/components/ui/skeleton";
-import { QueryError } from "@/components/QueryError";
-import {
-  useAdminAdicionarDiaFechado,
-  useAdminGuardarHorario,
-  useAdminHorario,
-  useAdminRemoverDiaFechado,
-} from "@/hooks/useAdminApi";
-import type { HorarioDia } from "@/types/api";
+import { formatDate, formatHora, todayIso } from "@/shared/lib/format";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
+import { Switch } from "@/shared/ui/switch";
+import { Skeleton } from "@/shared/ui/skeleton";
+import { QueryError } from "@/shared/components/QueryError";
+import { useAdminAdicionarDiaFechado, useAdminGuardarHorario, useAdminHorario, useAdminRemoverDiaFechado } from "@/modules/schedule/hooks/useScheduleApi";
+import type { HorarioDia } from "@/modules/schedule/models";
 
 const DIAS = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
 
