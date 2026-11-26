@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiClient, extractApiData } from "@/lib/httpClient";
-import { useInfiniteList, type PageResponse } from "@/lib/pagination";
-import type {
-  ComunidadeItem, ContactoChat, Conversa, DetalhesChat, FavoritaChat, HistoricoChat, InfoMensagemChat, MensagemChat,
-} from "@/types/api";
+import { apiClient, extractApiData } from "@/shared/api/httpClient";
+import { useInfiniteList, type PageResponse } from "@/shared/api/pagination";
+import type { ComunidadeItem, ContactoChat, Conversa, DetalhesChat, FavoritaChat, HistoricoChat, InfoMensagemChat, MensagemChat } from "@/modules/chat/models";
 
 const BASE = "/api/chat";
 const CONVERSAS = `${BASE}/conversas`;
