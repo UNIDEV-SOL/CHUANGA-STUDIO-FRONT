@@ -4,15 +4,15 @@ import { ArrowLeft, Loader2, MailCheck } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
-import { Logo } from "@/atoms/Logo";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { useAuth } from "@/context/AuthContext";
-import { apiClient, extractApiData } from "@/lib/httpClient";
-import { API_ENDPOINTS } from "@/lib/apiEndpoints";
-import { SENHA_DICA, erroSenha } from "@/lib/senha";
+import { Logo } from "@/shared/components/Logo";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/shared/ui/input-otp";
+import { useAuth } from "@/modules/auth/context/AuthContext";
+import { apiClient, extractApiData } from "@/shared/api/httpClient";
+import { API_ENDPOINTS } from "@/shared/api/apiEndpoints";
+import { SENHA_DICA, erroSenha } from "@/modules/auth/lib/senha";
 
 /** Segundos até poder pedir outro código. */
 const ESPERA_REENVIO = 60;
