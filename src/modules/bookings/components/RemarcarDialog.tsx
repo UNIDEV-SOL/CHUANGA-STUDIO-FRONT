@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import { CalendarClock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { formatDate, formatHora } from "@/lib/format";
-import { Button } from "@/components/ui/button";
+import { formatDate, formatHora } from "@/shared/lib/format";
+import { Button } from "@/shared/ui/button";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
-} from "@/components/ui/dialog";
-import { SeletorHorario } from "@/components/SeletorHorario";
-import { useMinhaAreaRemarcar } from "@/hooks/useMinhaAreaApi";
-import { useAdminRemarcar } from "@/hooks/useAdminApi";
-import type { Marcacao } from "@/types/api";
+} from "@/shared/ui/dialog";
+import { SeletorHorario } from "@/modules/bookings/components/SeletorHorario";
+import { useMinhaAreaRemarcar } from "@/modules/bookings/hooks/useBookingsApi";
+import { useAdminRemarcar } from "@/modules/bookings/hooks/useBookingsApi";
+import type { Marcacao } from "@/modules/bookings/models";
 
 /** Nova data/hora para uma marcação: a cliente (na sua área) ou o estúdio (no painel). */
 export function RemarcarDialog({
