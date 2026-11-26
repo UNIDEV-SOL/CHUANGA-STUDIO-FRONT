@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
 import { AlertTriangle, Loader2, Mail, MessageCircle, MessagesSquare, Phone, Receipt, Save } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAbrirConversaComCliente } from "@/hooks/useChatApi";
+import { useAbrirConversaComCliente } from "@/modules/chat/hooks/useChatApi";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
-import { formatDate, formatHora, formatMZN, whatsappLink } from "@/lib/format";
-import { StatusBadge } from "@/atoms/StatusBadge";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Skeleton } from "@/components/ui/skeleton";
+import { formatDate, formatHora, formatMZN, whatsappLink } from "@/shared/lib/format";
+import { StatusBadge } from "@/shared/components/StatusBadge";
+import { Button } from "@/shared/ui/button";
+import { Textarea } from "@/shared/ui/textarea";
+import { Skeleton } from "@/shared/ui/skeleton";
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
-} from "@/components/ui/dialog";
-import { useAdminClienteDetalhe, useAdminGuardarNotasCliente } from "@/hooks/useAdminApi";
+} from "@/shared/ui/dialog";
+import { useAdminClienteDetalhe, useAdminGuardarNotasCliente } from "@/modules/clients/hooks/useClientsApi";
 
 function Numero({ label, valor, alerta }: { label: string; valor: string | number; alerta?: boolean }) {
   return (
