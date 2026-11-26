@@ -2,30 +2,30 @@ import { useRef, useState } from "react";
 import { Check, Eye, EyeOff, ImagePlus, Loader2, Pencil, Star, Trash2 } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import { CATEGORY_META } from "@/data/mock-services";
-import { prepararFoto, urlDaApi } from "@/lib/imagem";
-import { AdicionarFotosDialog } from "@/components/AdicionarFotosDialog";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
-import { Skeleton } from "@/components/ui/skeleton";
-import { QueryError } from "@/components/QueryError";
-import { FimDaLista } from "@/components/FimDaLista";
+import { CATEGORY_META } from "@/modules/catalog/data/mock-services";
+import { prepararFoto, urlDaApi } from "@/shared/lib/imagem";
+import { AdicionarFotosDialog } from "@/modules/gallery/components/AdicionarFotosDialog";
+import { cn } from "@/shared/lib/utils";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
+import { Switch } from "@/shared/ui/switch";
+import { Textarea } from "@/shared/ui/textarea";
+import { Skeleton } from "@/shared/ui/skeleton";
+import { QueryError } from "@/shared/components/QueryError";
+import { FimDaLista } from "@/shared/components/FimDaLista";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
+} from "@/shared/ui/select";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/shared/ui/dialog";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { useAdminGaleria, useAtualizarFoto, useCuradoriaFoto, useRemoverFoto, useSubstituirFoto, useSugestoesPendentes } from "@/hooks/useAdminApi";
-import type { GaleriaItem } from "@/types/api";
+} from "@/shared/ui/alert-dialog";
+import { useAdminGaleria, useAtualizarFoto, useCuradoriaFoto, useRemoverFoto, useSubstituirFoto, useSugestoesPendentes } from "@/modules/gallery/hooks/useGalleryApi";
+import type { GaleriaItem } from "@/modules/gallery/models";
 
 const CATEGORIAS = Object.entries(CATEGORY_META).map(([valor, m]) => ({ valor, label: m.label }));
 
