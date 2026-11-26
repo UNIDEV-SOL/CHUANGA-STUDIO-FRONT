@@ -19,10 +19,16 @@ export const apiClient = axios.create({
 /** Erro normalizado: `message` já vem com a mensagem do backend quando existe. */
 export class ApiError extends Error {
   readonly status?: number;
-  constructor(message: string, status?: number) {
+  /** Código estável do backend (ex.: TOKEN_EXPIRADO, LIMITE_PEDIDOS, DADOS_INVALIDOS). */
+  readonly codigo?: string;
+  /** Erros por campo (validação) ou detalhes do erro, quando o backend os envia. */
+  readonly dados?: unknown;
+  constructor(message: string, status?: number, codigo?: string, dados?: unknown) {
     super(message);
     this.name = "ApiError";
     this.status = status;
+    this.codigo = codigo;
+    this.dados = dados;
   }
 }
 
@@ -46,17 +52,25 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-const AUTH_PATHS: string[] = [API_ENDPOINTS.auth.entrar, API_ENDPOINTS.auth.cadastrar];
+const AUTH_PATHS: string[] = [
+  API_ENDPOINTS.auth.entrar,
+  API_ENDPOINTS.auth.cadastrar,
+  API_ENDPOINTS.auth.recuperarSenha,
+  API_ENDPOINTS.auth.verificarCodigo,
+  API_ENDPOINTS.auth.redefinirSenha,
+];
 
 apiClient.interceptors.response.use(
   (res) => res,
-  (error: AxiosError) => {
+  (error: AxiosError<{ codigo?: string; dados?: unknown }>) => {
     const status = error.response?.status;
     const url = error.config?.url ?? "";
+    const mensagem = extractApiMensagem(error);
     // 401 num endpoint de auth = credenciais erradas, não sessão expirada.
+    // Nos outros, o backend diz porquê (expirou, conta desativada, palavra-passe trocada...).
     if (status === 401 && !AUTH_PATHS.includes(url) && getToken()) {
-      clearSession("expired");
+      clearSession("expired", mensagem);
     }
-    return Promise.reject(new ApiError(extractApiMensagem(error), status));
+    return Promise.reject(new ApiError(mensagem, status, error.response?.data?.codigo, error.response?.data?.dados));
   },
 );
