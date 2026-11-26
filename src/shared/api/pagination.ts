@@ -1,5 +1,5 @@
 import { useInfiniteQuery, type QueryKey } from "@tanstack/react-query";
-import { apiClient, extractApiData } from "./httpClient";
+import { apiClient, extractApiData } from "@/shared/api/httpClient";
 
 /** Página da API (mesmo formato do SPO-BACK: PageResponse). */
 export interface PageResponse<T> {
