@@ -5,25 +5,25 @@ import {
   MessageSquarePlus, MoreVertical, Pin, PinOff, Search, Star, Users, UsersRound, X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { cn } from "@/shared/lib/utils";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/shared/ui/dialog";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/shared/ui/dropdown-menu";
 import {
   useApagarMensagem, useComunidade, useConversa, useConversas, useFavoritar, useFixarMensagem, useGestaoGrupo,
   useMensagens, usePesquisaMensagens, usePreferencias, useReagir, type FiltroConversas,
-} from "@/hooks/useChatApi";
-import { useDebounce } from "@/hooks/useDebounce";
-import type { ComunidadeItem, Conversa, MensagemChat } from "@/types/api";
-import { AvatarConversa } from "./AvatarConversa";
-import { Bolha, type AcoesBolha } from "./Bolha";
-import { Compositor } from "./Compositor";
-import { DetalhesPainel } from "./DetalhesPainel";
-import { EncaminharDialog, FavoritasDialog, InfoMensagemDialog, NovaConversaDialog, NovoGrupoDialog } from "./Dialogos";
-import { formatarTexto, horaDe, quando, rotuloDia, vistoPorUltimo } from "./util";
+} from "@/modules/chat/hooks/useChatApi";
+import { useDebounce } from "@/shared/hooks/useDebounce";
+import type { ComunidadeItem, Conversa, MensagemChat } from "@/modules/chat/models";
+import { AvatarConversa } from "@/modules/chat/components/AvatarConversa";
+import { Bolha, type AcoesBolha } from "@/modules/chat/components/Bolha";
+import { Compositor } from "@/modules/chat/components/Compositor";
+import { DetalhesPainel } from "@/modules/chat/components/DetalhesPainel";
+import { EncaminharDialog, FavoritasDialog, InfoMensagemDialog, NovaConversaDialog, NovoGrupoDialog } from "@/modules/chat/components/Dialogos";
+import { formatarTexto, horaDe, quando, rotuloDia, vistoPorUltimo } from "@/modules/chat/components/util";
 
 const FILTROS: { valor: FiltroConversas; label: string }[] = [
   { valor: "todas", label: "Todas" },
